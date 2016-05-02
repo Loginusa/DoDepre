@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "657311792154",
+    "project_id": "dosis-1293",
+    "name": "DoSiS"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:657311792154:android:9d573d4574907940",
+        "client_id": "android:id.loginusa.dosis",
+        "client_type": 1,
+        "android_client_info": {
+          "package_name": "id.loginusa.dosis",
+          "certificate_hash": []
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBOAYH3OGJu_dvDIhYo66F9Hzszr3Juq9U"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "cloud_messaging_service": {
+          "status": 2,
+          "apns_config": []
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "google_signin_service": {
+          "status": 1
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "client_info": [],
+  "ARTIFACT_VERSION": "1"
+}

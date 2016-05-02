@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">DoSiS</string>
+    <string name="title_activity_main">MainActivity</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+
+    <!--gcm-->
+    <string name="gcm_send_message">Device Berhasil di daftarkan !.</string>
+    <string name="registering_message">Generating InstanceID token...</string>
+    <string name="token_error_message">Gagal Registrasi Device ke server, mohon ulangi setelah beberapa saat.</string>
+    <string name="label_daftarkan_device_ke_server">Mendaftarkan Device Ke Server</string>
+    <string name="loginusa_web">www.loginusa.id</string>
+    <string name="title_activity_home">HomeActivity</string>
+</resources>
