@@ -12,6 +12,7 @@ import android.widget.ViewSwitcher;
 public class SplashActivity extends AppCompatActivity {
     LinearLayout splashLayout;
     private final int SPLASH_DISPLAY_LENGTH = 2100;
+    //Timer dan Animasi
     Handler timer;
     Runnable runnable;
     ViewSwitcher viewSwitcher;
