@@ -14,4 +14,22 @@
     <string name="label_daftarkan_device_ke_server">Mendaftarkan Device Ke Server</string>
     <string name="loginusa_web">www.loginusa.id</string>
     <string name="title_activity_home">HomeActivity</string>
+    <string name="title_activity_login">Sign in</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_username">Username</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
+    <string name="exit_confirm">Yakin Keluar Aplikasi ?</string>
+    <string name="logout_confirm">Yakin Logout ?</string>
+    <string name="yes">Ya</string>
+    <string name="cancel">Batal</string>
 </resources>

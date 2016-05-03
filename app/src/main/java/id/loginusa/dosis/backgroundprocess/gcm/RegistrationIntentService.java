@@ -27,10 +27,8 @@ import com.google.android.gms.iid.InstanceID;
 
 import java.io.IOException;
 
-import id.loginusa.dosis.util.Logging;
 import id.loginusa.dosis.util.SessionManager;
 import id.loginusa.dosis.R;
-import id.loginusa.dosis.util.SessionManager;
 import id.loginusa.dosis.util.StaticVar;
 
 //import gcm.play.android.samples.com.gcmquickstart.util.GetMobileIPAddress;
@@ -97,7 +95,7 @@ public class RegistrationIntentService extends IntentService {
                 // otherwise your server should have already received the token.
                 /*sharedPreferences.edit().putBoolean(QuickstartPreferences.SENT_TOKEN_TO_SERVER, true).apply();
                 sharedPreferences.edit().putString(QuickstartPreferences.CURRENT_TOKEN, token).apply();*/
-                session.createTokenSentSession(true,token,instanceID.getId());
+                session.createGCMTokenSentSession(true,token,instanceID.getId());
 
                 // [END register_for_gcm]
             }
@@ -107,7 +105,7 @@ public class RegistrationIntentService extends IntentService {
             // on a third-party server, this ensures that we'll attempt the update at a later time.
            /* sharedPreferences.edit().putBoolean(QuickstartPreferences.SENT_TOKEN_TO_SERVER, false).apply();
             sharedPreferences.edit().putString(QuickstartPreferences.CURRENT_TOKEN, "").apply();*/
-            session.createTokenSentSession(false,"","");
+            session.createGCMTokenSentSession(false,"","");
             //sharedPreferences.edit().putBoolean(QuickstartPreferences.SENT_REGID_TO_SERVER, true).apply();
         }
         // Notify UI that registration has completed, so the progress indicator can be hidden.

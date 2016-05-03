@@ -21,21 +21,21 @@ public class SessionManager {
     // Shared pref mode
     int PRIVATE_MODE = 0;
 
-    // Sharedpref file name
-    private static final String PREF_NAME = "LoginusaIndHealthPref";
+
 
     // All Shared Preferences Keys
+    //token
     public static final String SENT_TOKEN_TO_SERVER = "sentTokenToServer";
     public static final String CURRENT_TOKEN = "sentRegidToServer";
     public static final String CURRENT_INSTANCE_ID = "instanceid";
-    public static final String REGISTED = "instanceid";
+    public static final String REGISTERED = "instanceid";
 
 
 
     // Constructor
     public SessionManager(Context context){
         this._context = context;
-        pref = _context.getSharedPreferences(PREF_NAME, PRIVATE_MODE);
+        pref = _context.getSharedPreferences(StaticVar.PREF_NAME, PRIVATE_MODE);
         editor = pref.edit();
     }
 
@@ -157,7 +157,7 @@ public class SessionManager {
     /**
      * get Current Token
      * **/
-    public void createTokenSentSession(boolean issent, String token, String instanceid){
+    public void createGCMTokenSentSession(boolean issent, String token, String instanceid){
         // Storing is token sent value as TRUE
         editor.putBoolean(SENT_TOKEN_TO_SERVER, issent).apply();
         // Storing current token
