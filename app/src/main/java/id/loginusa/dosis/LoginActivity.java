@@ -22,10 +22,17 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import id.loginusa.dosis.util.Logging;
 import id.loginusa.dosis.util.LoginUtility;
+import id.loginusa.dosis.util.externalconnection.DosisConnection;
+import id.loginusa.dosis.util.externalconnection.OpenbravoGetUserConnection;
 
 /**
  * A login screen that offers login via email/password.
@@ -305,10 +312,12 @@ public class LoginActivity extends AppCompatActivity /*implements LoaderCallback
 
         private final String mUsername;
         private final String mPassword;
+        private String messageErr;
 
         UserLoginTask(String username, String password) {
             mUsername = username;
             mPassword = password;
+            messageErr = "";
         }
 
         @Override
@@ -317,16 +326,30 @@ public class LoginActivity extends AppCompatActivity /*implements LoaderCallback
 
             try {
                 // Simulate network access.
-                Thread.sleep(2000);
+                Thread.sleep(1000);
+                DosisConnection dc = new DosisConnection();
+                Map<String,String> param = new HashMap<String,String>();
+                param.put("username",mUsername);
+                dc.sendRequest(new OpenbravoGetUserConnection(),param);
+
+                //messageErrnya balasan dari JSONnya, bukan kaya gini
+                messageErr = "Login Sukses";
+                return true;
+
             } catch (InterruptedException e) {
+                messageErr = "Login Gagal : "+e.getMessage();
+                return false;
+            } catch (IOException ioe) {
+                messageErr = "Login Gagal : "+ioe.getMessage();
+                Logging.log('e',"ERROR_DosisConnection","ERROR : "+ioe.getMessage());
                 return false;
             }
 
-            if (mUsername.equals("loginusa") && mPassword.equals("aaaaa")) {
-                return true;
-            } else {
-                return false;
-            }
+//            if (mUsername.equals("loginusa") && mPassword.equals("aaaaa")) {
+//                return true;
+//            } else {
+//                return false;
+//            }
 
             // TODO: register the new account here.
             //return true;
@@ -339,9 +362,14 @@ public class LoginActivity extends AppCompatActivity /*implements LoaderCallback
 
             if (success) {
                 loginSession.createLoginSession("loginusa","fachmi","mfachmirizal@loginusa.com","nckhl.jpeg");
+                //kasih intent result, passing message error
                 finish();
             } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
+                if (messageErr.length() > 0) {
+                    Toast.makeText(LoginActivity.this, "Gagal Login : " + messageErr, Toast.LENGTH_SHORT).show();
+                } else {
+                    mPasswordView.setError(getString(R.string.error_incorrect_password));
+                }
                 mPasswordView.requestFocus();
             }
         }
