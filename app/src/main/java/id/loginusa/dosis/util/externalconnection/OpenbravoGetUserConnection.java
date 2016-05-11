@@ -11,6 +11,9 @@ import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.Key;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
@@ -26,7 +29,7 @@ public class OpenbravoGetUserConnection implements Koneksi {
     static final JsonFactory JSON_FACTORY = new JacksonFactory();
 
     @Override
-    public void startConnection(Map<String,String> param)  throws IOException {
+    public JSONObject executeConnection(Map<String,String> param)  throws IOException,JSONException {
         HttpRequestFactory requestFactory =
                 HTTP_TRANSPORT.createRequestFactory(new HttpRequestInitializer() {
                     @Override
@@ -35,11 +38,15 @@ public class OpenbravoGetUserConnection implements Koneksi {
                     }
                 });
         String strparamuser = "";
+        String strparampass = "";
         for(Map.Entry<String, String> entry : param.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
             if (key.equals("username")) {
                 strparamuser+=value;
+            }
+            if (key.equals("pss")) {
+                strparampass+=value;
             }
         }
 
@@ -48,8 +55,7 @@ public class OpenbravoGetUserConnection implements Koneksi {
         }
 
         //String strUrl = StaticVar.SERVER_URL+"/"+StaticVar.SERVER_CONTEXT+"/org.openbravo.service.json.jsonrest/ADUser?_where=username='"+strparamuser+"'&"+StaticVar.SERVER_WS_CREDENT;
-        String strUrl = StaticVar.SERVER_URL+"/"+StaticVar.SERVER_CONTEXT+"/org.openbravo.service.json.jsonrest/ADUser";
-
+        String strUrl = StaticVar.SERVER_URL+"/"+StaticVar.SERVER_CONTEXT+"/ws/id.loginusa.dosis.loginservice";
 
         //URL myURL = new URL(strUrl);
 
@@ -57,28 +63,26 @@ public class OpenbravoGetUserConnection implements Koneksi {
 
         url.put("l","Openbravo");
         url.put("p","PwOd6SgWF74HY4u51bfrUxjtB9g=");
-        url.put("_where","username='"+strparamuser+"'");
-
-
-
-        Logging.log('d',"OB_URL1",url.toString());
+        url.put("username",strparamuser);
+        url.put("pss",strparampass);
         //url.put("fields", "items(id,url,object(content,plusoners/totalItems))");
         HttpRequest request = requestFactory.buildGetRequest(url);
 
-        Logging.log('d',"OB_URL2",request.getUrl().toString());
+        Logging.log('d',"OB_URL",request.getUrl().toString());
 
-
-
-        parseResponse(request.execute());
+        JSONObject respon = parseResponse(request.execute());
+        return respon;
     }
 
-    public void parseResponse(HttpResponse response) throws IOException {
+    public JSONObject parseResponse(HttpResponse response) throws IOException ,JSONException{
         String hasil = response.parseAsString();
-        if (hasil.isEmpty()) {
-            Logging.log('d',"TEST_KONEKSI","HASIL NYA : KOSONG");
-        } else {
-            Logging.log('d',"TEST_KONEKSI","HASIL NYA : "+hasil);
-        }
+        JSONObject jobject = new JSONObject(hasil);
+        return jobject;
+//        if (hasil.isEmpty()) {
+//            Logging.log('d',"TEST_KONEKSI","HASIL NYA : KOSONG");
+//        } else {
+//            Logging.log('d',"TEST_KONEKSI","HASIL NYA : "+hasil);
+//        }
     }
 
 //nanti lanjutkan, ini class representasi dari entitas ad_user [ dibuat terpisah ]

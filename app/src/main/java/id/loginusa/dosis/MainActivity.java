@@ -227,7 +227,7 @@ public class MainActivity extends AppCompatActivity
             navigationView.getMenu().setGroupVisible(R.id.gr_not_login, false);
             navigationView.getMenu().setGroupVisible(R.id.gr_is_login, true);
             navhead_name.setText(user.get(LoginUtility.LOGIN_NAME));
-            navhead_email.setText(user.get(LoginUtility.LOGIN_NAME));
+            navhead_email.setText(user.get(LoginUtility.LOGIN_EMAIL));
 /*            String imagePath = sharedPreferences.getString(LoginSharedPreference.PROFPIC,"");
             if (imagePath != "") {
                 navhead_profpic.setImageBitmap(U.getBitmap(imagePath));

@@ -24,11 +24,16 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import id.loginusa.dosis.util.CryptoSHA1BASE64;
 import id.loginusa.dosis.util.Logging;
 import id.loginusa.dosis.util.LoginUtility;
 import id.loginusa.dosis.util.externalconnection.DosisConnection;
@@ -323,25 +328,42 @@ public class LoginActivity extends AppCompatActivity /*implements LoaderCallback
         @Override
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
-
+            JSONArray data = new JSONArray();
             try {
                 // Simulate network access.
                 Thread.sleep(1000);
                 DosisConnection dc = new DosisConnection();
                 Map<String,String> param = new HashMap<String,String>();
                 param.put("username",mUsername);
-                dc.sendRequest(new OpenbravoGetUserConnection(),param);
+                param.put("pss", CryptoSHA1BASE64.hash(mPassword));
+                JSONObject jsonResponse = dc.sendRequest(new OpenbravoGetUserConnection(),param);
+                data = jsonResponse.getJSONObject("response").getJSONArray("data");
 
-                //messageErrnya balasan dari JSONnya, bukan kaya gini
-                messageErr = "Login Sukses";
-                return true;
-
+                if (jsonResponse.getJSONObject("response").get("status_code").toString().equals("1")) {
+                    messageErr = getString(R.string.login_success);
+                    loginSession.createLoginSession(data.getJSONObject(0).getString("username"),
+                            data.getJSONObject(0).getString("name"),
+                            data.getJSONObject(0).getString("email"),
+                            "nckhl.jpeg");
+                    return true;
+                } else {
+                    messageErr = getString(R.string.incorrect_login);
+                    return false;
+                }
             } catch (InterruptedException e) {
-                messageErr = "Login Gagal : "+e.getMessage();
+                messageErr = getString(R.string.cant_connect_to_ob);
                 return false;
             } catch (IOException ioe) {
                 messageErr = "Login Gagal : "+ioe.getMessage();
                 Logging.log('e',"ERROR_DosisConnection","ERROR : "+ioe.getMessage());
+                return false;
+            } catch (JSONException jex) {
+                messageErr = "Login Gagal : "+jex.getMessage();
+                Logging.log('e',"ERROR_JSONException","ERROR : "+jex.getMessage());
+                return false;
+            } catch (Exception ex) {
+                messageErr = "Login Gagal : "+ex.getMessage();
+                Logging.log('e',"ERROR_Exception","ERROR : "+ex.getMessage());
                 return false;
             }
 
@@ -361,16 +383,23 @@ public class LoginActivity extends AppCompatActivity /*implements LoaderCallback
             showProgress(false);
 
             if (success) {
-                loginSession.createLoginSession("loginusa","fachmi","mfachmirizal@loginusa.com","nckhl.jpeg");
+                Toast.makeText(LoginActivity.this,messageErr, Toast.LENGTH_SHORT).show();
+                //loginSession.createLoginSession("loginusa","fachmi","mfachmirizal@loginusa.com","nckhl.jpeg");
                 //kasih intent result, passing message error
                 finish();
             } else {
-                if (messageErr.length() > 0) {
-                    Toast.makeText(LoginActivity.this, "Gagal Login : " + messageErr, Toast.LENGTH_SHORT).show();
-                } else {
-                    mPasswordView.setError(getString(R.string.error_incorrect_password));
-                }
-                mPasswordView.requestFocus();
+//                if (messageErr.length() > 0) {
+                    Toast.makeText(LoginActivity.this,messageErr, Toast.LENGTH_SHORT).show();
+//                } else {
+//                    mPasswordView.setError(getString(R.string.error_incorrect_password));
+//                }
+                mUserView.requestFocus();
+                mUserView.selectAll();
+                mPasswordView.setText("");
+                InputMethodManager imm = (InputMethodManager)
+                        getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(mUserView,
+                        InputMethodManager.SHOW_IMPLICIT);
             }
         }
 

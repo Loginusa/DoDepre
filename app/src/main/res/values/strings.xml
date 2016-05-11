@@ -32,4 +32,7 @@
     <string name="logout_confirm">Yakin Logout ?</string>
     <string name="yes">Ya</string>
     <string name="cancel">Batal</string>
+    <string name="incorrect_login">Incorrect User / Password</string>
+    <string name="login_success">Login Success</string>
+    <string name="cant_connect_to_ob">Can\'t connect to server</string>
 </resources>
