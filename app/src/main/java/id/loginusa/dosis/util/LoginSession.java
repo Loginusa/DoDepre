@@ -76,12 +76,18 @@ public class LoginSession extends SessionManager{
         //bagaimana memecah lat long nya ?
         editor.putString(USER_ADDRESS, data.get("address").getAsString()); // isinya JSON*/
 
-        editor.putBoolean(USER_IS_LOGIN, true);
-        editor.putString(USER_DATA,data.toString());
 
+        editor.putString(USER_DATA,data.toString());
         // commit changes
         editor.commit();
+
+        editor.putBoolean(USER_IS_LOGIN, isLoggedIn());
+        //re commit for set is_login
+        editor.commit();
+
     }
+
+
 
     /**
      * check this user login status, if not login, the redirect to login page
@@ -123,7 +129,9 @@ public class LoginSession extends SessionManager{
      * **/
     // Get Login State
     public boolean isLoggedIn(){
-        return pref.getBoolean(USER_IS_LOGIN, false);
+        //return pref.getBoolean(USER_IS_LOGIN, false);
+        UserData user = getUserDetails();
+        return user.isIsLogin();
     }
 
     /**

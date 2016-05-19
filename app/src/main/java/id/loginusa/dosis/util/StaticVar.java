@@ -28,4 +28,6 @@ public class StaticVar {
     public static final int OB_RESPONSE_CODE_AUTH_FAILED = 0 ;
 
     public static final int OB_RESPONSE_CODE_BANNED = 3;
+
+    public static final int OB_RESPONSE_SERVER_ERROR = 99;
 }

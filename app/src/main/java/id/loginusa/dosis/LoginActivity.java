@@ -353,7 +353,11 @@ public class LoginActivity extends AppCompatActivity /*implements LoaderCallback
                     loginSession.createLoginSession(jsonResponse);
 
                     return true;
-                } else {
+                } else if (status_code == StaticVar.OB_RESPONSE_SERVER_ERROR) {
+                    messageErr = "Internal Server Error, bila tetap berlanjut, harap hubungi pengembang.";
+                    return false;
+                }
+                else {
                     messageErr = getString(R.string.incorrect_login);
                     return false;
                 } /* */
