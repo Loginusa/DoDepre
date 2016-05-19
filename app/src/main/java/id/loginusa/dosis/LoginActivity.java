@@ -24,6 +24,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,9 +38,11 @@ import java.util.Map;
 
 import id.loginusa.dosis.util.CryptoSHA1BASE64;
 import id.loginusa.dosis.util.Logging;
-import id.loginusa.dosis.util.LoginUtility;
-import id.loginusa.dosis.util.externalconnection.DosisConnection;
-import id.loginusa.dosis.util.externalconnection.OpenbravoGetUserConnection;
+import id.loginusa.dosis.util.LoginSession;
+import id.loginusa.dosis.util.StaticVar;
+import id.loginusa.dosis.util.externalconnection.openbravows.OpenbravoConnection;
+import id.loginusa.dosis.util.externalconnection.openbravows.OpenbravoLoginService;
+import id.loginusa.dosis.util.json.JsonBuilder;
 
 /**
  * A login screen that offers login via email/password.
@@ -52,7 +57,7 @@ public class LoginActivity extends AppCompatActivity /*implements LoaderCallback
     /**
      * Login Session
      */
-    LoginUtility loginSession;
+    LoginSession loginSession;
 
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
@@ -72,7 +77,7 @@ public class LoginActivity extends AppCompatActivity /*implements LoaderCallback
         setContentView(R.layout.activity_login);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        loginSession = new LoginUtility(getApplicationContext());
+        loginSession = new LoginSession(getApplicationContext());
 
         // Set up the login form.
         mUserView = (AutoCompleteTextView) findViewById(R.id.username);
@@ -328,33 +333,35 @@ public class LoginActivity extends AppCompatActivity /*implements LoaderCallback
         @Override
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
-            JSONArray data = new JSONArray();
+            //JSONArray data = new JSONArray();
+            JsonArray data = new JsonArray();
             try {
                 // Simulate network access.
                 Thread.sleep(1000);
-                DosisConnection dc = new DosisConnection();
+                OpenbravoConnection dc = new OpenbravoConnection();
                 Map<String,String> param = new HashMap<String,String>();
                 param.put("username",mUsername);
                 param.put("pss", CryptoSHA1BASE64.hash(mPassword));
-                JSONObject jsonResponse = dc.sendRequest(new OpenbravoGetUserConnection(),param);
-                data = jsonResponse.getJSONObject("response").getJSONArray("data");
+                JsonObject jsonResponse = dc.sendRequest(new OpenbravoLoginService(),param);
 
-                if (jsonResponse.getJSONObject("response").get("status_code").toString().equals("1")) {
+                int status_code = JsonBuilder.getJsonStatusCode(jsonResponse);
+                Logging.log('d',"status_code","status_code : "+status_code);
+                Logging.log('d',"Response","Login activity : "+jsonResponse.toString());
+
+                if (status_code == StaticVar.OB_RESPONSE_CODE_AUTH_SUCCES) {
                     messageErr = getString(R.string.login_success);
-                    loginSession.createLoginSession(data.getJSONObject(0).getString("username"),
-                            data.getJSONObject(0).getString("name"),
-                            data.getJSONObject(0).getString("email"),
-                            "nckhl.jpeg");
+                    loginSession.createLoginSession(jsonResponse);
+
                     return true;
                 } else {
                     messageErr = getString(R.string.incorrect_login);
                     return false;
-                }
+                } /* */
             } catch (InterruptedException e) {
                 messageErr = getString(R.string.cant_connect_to_ob);
                 return false;
             } catch (IOException ioe) {
-                messageErr = "Login Gagal : "+ioe.getMessage();
+                messageErr = getString(R.string.cant_connect_to_ob);
                 Logging.log('e',"ERROR_DosisConnection","ERROR : "+ioe.getMessage());
                 return false;
             } catch (JSONException jex) {
@@ -362,7 +369,7 @@ public class LoginActivity extends AppCompatActivity /*implements LoaderCallback
                 Logging.log('e',"ERROR_JSONException","ERROR : "+jex.getMessage());
                 return false;
             } catch (Exception ex) {
-                messageErr = "Login Gagal : "+ex.getMessage();
+                messageErr = getString(R.string.cant_connect_to_ob);
                 Logging.log('e',"ERROR_Exception","ERROR : "+ex.getMessage());
                 return false;
             }

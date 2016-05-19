@@ -21,19 +21,19 @@ import java.util.Map;
 import id.loginusa.dosis.util.Logging;
 import id.loginusa.dosis.util.StaticVar;
 
-public class ExternalUrl extends GenericUrl {
+public class BaseGenericUrl extends GenericUrl {
  //   static String url = "";
 
 
-    public ExternalUrl(String encodedUrl) {
+    public BaseGenericUrl(String encodedUrl) {
         super(encodedUrl);
     }
 
-    public ExternalUrl(URL url) {
+    public BaseGenericUrl(URL url) {
         super(url);
     }
 
-    public ExternalUrl() {
+    public BaseGenericUrl() {
         super();
     }
 

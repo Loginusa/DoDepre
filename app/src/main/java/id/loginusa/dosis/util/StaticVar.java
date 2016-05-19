@@ -23,6 +23,9 @@ public class StaticVar {
     //OB WS Credential
     public static final String SERVER_WS_CREDENT = "l=Openbravo&p=PwOd6SgWF74HY4u51bfrUxjtB9g=";
 
-    public static final String SERVER_WS_CREDENT_2 = "l=Openbravo&p=openbravo";
+    public static final int OB_RESPONSE_CODE_AUTH_SUCCES = 1;
 
+    public static final int OB_RESPONSE_CODE_AUTH_FAILED = 0 ;
+
+    public static final int OB_RESPONSE_CODE_BANNED = 3;
 }

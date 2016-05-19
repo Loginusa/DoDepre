@@ -3,15 +3,11 @@ package id.loginusa.dosis;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -23,10 +19,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
@@ -36,11 +29,12 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import java.util.HashMap;
 
 import id.loginusa.dosis.util.Logging;
-import id.loginusa.dosis.util.LoginUtility;
+import id.loginusa.dosis.util.LoginSession;
+import id.loginusa.dosis.util.json.entity.UserData;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-    LoginUtility loginSession;
+    LoginSession loginSession;
     FloatingActionButton fab;
     Toolbar toolbar;
 
@@ -61,7 +55,7 @@ public class MainActivity extends AppCompatActivity
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        loginSession = new LoginUtility(getApplicationContext());
+        loginSession = new LoginSession(getApplicationContext());
 
         //nav drawer
 
@@ -219,15 +213,15 @@ public class MainActivity extends AppCompatActivity
     public void setDrawerMenuByRole() {
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         // View navHeader = navigationView.getHeaderView(R.layout.nav_header_main);
-        HashMap<String, String> user = loginSession.getUserDetails();
+        UserData user = loginSession.getUserDetails();
 
         TextView navhead_name = (TextView) navigationView.getHeaderView(0).findViewById(R.id.navhead_name);
         TextView navhead_email = (TextView) navigationView.getHeaderView(0).findViewById(R.id.navhead_email);
         if (loginSession.isLoggedIn()) {
             navigationView.getMenu().setGroupVisible(R.id.gr_not_login, false);
             navigationView.getMenu().setGroupVisible(R.id.gr_is_login, true);
-            navhead_name.setText(user.get(LoginUtility.LOGIN_NAME));
-            navhead_email.setText(user.get(LoginUtility.LOGIN_EMAIL));
+            navhead_name.setText(user.getUsername());
+            navhead_email.setText(user.getEmail());
 /*            String imagePath = sharedPreferences.getString(LoginSharedPreference.PROFPIC,"");
             if (imagePath != "") {
                 navhead_profpic.setImageBitmap(U.getBitmap(imagePath));

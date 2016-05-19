@@ -1,4 +1,4 @@
-package id.loginusa.dosis.util.externalconnection;
+package id.loginusa.dosis.util.externalconnection.openbravows;
 
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
@@ -9,27 +9,28 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.util.Key;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import org.json.JSONException;
-import org.json.JSONObject;
+
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.Map;
 
 import id.loginusa.dosis.util.Logging;
 import id.loginusa.dosis.util.StaticVar;
+import id.loginusa.dosis.util.externalconnection.BaseGenericUrl;
 
 /**
  * Created by mfachmirizal on 10-May-16.
  */
-public class OpenbravoGetUserConnection implements Koneksi {
+public class OpenbravoLoginService implements OpenbravoWebService {
     static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
     static final JsonFactory JSON_FACTORY = new JacksonFactory();
 
     @Override
-    public JSONObject executeConnection(Map<String,String> param)  throws IOException,JSONException {
+    public JsonObject executeConnection(Map<String,String> param)  throws IOException,JSONException {
         HttpRequestFactory requestFactory =
                 HTTP_TRANSPORT.createRequestFactory(new HttpRequestInitializer() {
                     @Override
@@ -59,7 +60,7 @@ public class OpenbravoGetUserConnection implements Koneksi {
 
         //URL myURL = new URL(strUrl);
 
-        ExternalUrl url = new ExternalUrl(strUrl);
+        BaseGenericUrl url = new BaseGenericUrl(strUrl);
 
         url.put("l","Openbravo");
         url.put("p","PwOd6SgWF74HY4u51bfrUxjtB9g=");
@@ -70,34 +71,15 @@ public class OpenbravoGetUserConnection implements Koneksi {
 
         Logging.log('d',"OB_URL",request.getUrl().toString());
 
-        JSONObject respon = parseResponse(request.execute());
+        JsonObject respon = parseResponse(request.execute());
         return respon;
     }
 
-    public JSONObject parseResponse(HttpResponse response) throws IOException ,JSONException{
+    public JsonObject parseResponse(HttpResponse response) throws IOException ,JSONException{
         String hasil = response.parseAsString();
-        JSONObject jobject = new JSONObject(hasil);
-        return jobject;
-//        if (hasil.isEmpty()) {
-//            Logging.log('d',"TEST_KONEKSI","HASIL NYA : KOSONG");
-//        } else {
-//            Logging.log('d',"TEST_KONEKSI","HASIL NYA : "+hasil);
-//        }
+        JsonParser parser = new JsonParser();
+        JsonObject o = parser.parse(hasil).getAsJsonObject();
+        return o;
     }
-
-//nanti lanjutkan, ini class representasi dari entitas ad_user [ dibuat terpisah ]
-    /*public static class Data {
-        @Key
-        public String id;
-
-        @Key
-        public String _identifier;
-
-        @Key
-        public String title;
-
-        @Key
-        public String url;
-    }*/
 
 }
