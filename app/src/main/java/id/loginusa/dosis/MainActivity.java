@@ -1,8 +1,11 @@
 package id.loginusa.dosis;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
@@ -24,12 +27,17 @@ import android.widget.TextView;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.gson.JsonObject;
 
 
-import java.util.HashMap;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
+import id.loginusa.dosis.backgroundprocess.intentservices.updateserveraccinfo.ExecuteUpdateServerAccInfoIntentService;
 import id.loginusa.dosis.util.Logging;
 import id.loginusa.dosis.util.LoginSession;
+import id.loginusa.dosis.util.json.JsonBuilder;
 import id.loginusa.dosis.util.json.entity.UserData;
 
 public class MainActivity extends AppCompatActivity
@@ -39,9 +47,14 @@ public class MainActivity extends AppCompatActivity
     Toolbar toolbar;
 
     static Class fragmentClass = null;
-
     static DrawerLayout drawer;
     ActionBarDrawerToggle toggle;
+
+    //BroadcastReceiver
+    private updateServerAccInfoBroadcastReceiver receiver;
+
+    //testing
+    Button bt;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -57,9 +70,12 @@ public class MainActivity extends AppCompatActivity
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         loginSession = new LoginSession(getApplicationContext());
 
-        //nav drawer
+        IntentFilter filter = new IntentFilter(ExecuteUpdateServerAccInfoIntentService.ACTION_UpdateServerAccInfo);
+        filter.addCategory(Intent.CATEGORY_DEFAULT);
+        receiver = new updateServerAccInfoBroadcastReceiver();
+        registerReceiver(receiver, filter);
 
-        //Tambahkan pengecekan is login nanti, bila tidak login / password berubah, akan kembali ke guest screen
+        //TODO:Tambahkan pengecekan is login nanti, bila tidak login / password berubah, akan kembali ke guest screen
 
         EditText edToken, edInstanceId;
         edToken = (EditText) findViewById(R.id.edToken);
@@ -77,11 +93,13 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-                toolbar.setTitle("Anjayyy");
+                //toolbar.setTitle("Anjayyy");
+                Logging.toast(MainActivity.this,"Session Sekarang : "+loginSession.getUserData(),2);
+                Logging.log('i',"SESSION_SKRG","Session Sekarang : "+loginSession.getUserData());
             }
         });
 
-        Button bt = (Button) findViewById(R.id.buttest);
+        bt = (Button) findViewById(R.id.buttest);
         assert bt != null;
         if (param != null) { //bila berasal dari notif
             bt.setText(param);
@@ -90,9 +108,21 @@ public class MainActivity extends AppCompatActivity
         bt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                loginSession.clearSharedPreference();
-                Logging.toast(MainActivity.this, "Dihapus", 1);
-                //finish();
+                //loginSession.clearSharedPreference();
+                //Logging.toast(MainActivity.this, "Dihapus", 1);
+                UserData user = loginSession.getUserDetails();
+                user.setName("Luhur Pambudi");
+                user.setProfpic("gambar1");
+
+                try {
+                    loginSession.updateServerAccInfo(JsonBuilder.toJson(user,1));
+                } catch (Exception e) {
+                    Logging.toast(MainActivity.this,"Error saat update : "+e.getMessage(),2);
+                }
+
+
+//                finish();
+//                startActivity(getIntent());
             }
         });
 
@@ -220,8 +250,12 @@ public class MainActivity extends AppCompatActivity
         if (loginSession.isLoggedIn()) {
             navigationView.getMenu().setGroupVisible(R.id.gr_not_login, false);
             navigationView.getMenu().setGroupVisible(R.id.gr_is_login, true);
-            navhead_name.setText(user.getUsername());
+            navhead_name.setText(user.getName());
             navhead_email.setText(user.getEmail());
+
+            //test button yg preference
+            bt.setVisibility(View.VISIBLE);
+
 /*            String imagePath = sharedPreferences.getString(LoginSharedPreference.PROFPIC,"");
             if (imagePath != "") {
                 navhead_profpic.setImageBitmap(U.getBitmap(imagePath));
@@ -249,6 +283,9 @@ public class MainActivity extends AppCompatActivity
         } else {
             navigationView.getMenu().setGroupVisible(R.id.gr_not_login, true);
             navigationView.getMenu().setGroupVisible(R.id.gr_is_login, false);
+
+            bt.setText("Test Ganti Nama");
+            bt.setVisibility(View.INVISIBLE);
             //navhead_profpic.setOnClickListener(null);
         }
 
@@ -278,7 +315,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onStop() {
         super.onStop();
-
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         Action viewAction = Action.newAction(
@@ -293,5 +329,22 @@ public class MainActivity extends AppCompatActivity
         );
         AppIndex.AppIndexApi.end(client, viewAction);
         client.disconnect();
+    }
+
+    //broadcast receiver
+    public class updateServerAccInfoBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle extras = intent.getExtras();
+            String strRevDate = (String) extras.get(ExecuteUpdateServerAccInfoIntentService.BROADCAST_REV_DATE);
+            JsonObject jRevDate = JsonBuilder.getJsonObject(strRevDate);
+
+            try {
+                Date newRevDate = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(jRevDate.getAsJsonObject("response").get("data").getAsJsonArray().get(0).getAsString());
+                loginSession.setNewRevisionDate(newRevDate);
+            } catch (ParseException e) {
+                Logging.toast(MainActivity.this,"Gagal mendapatkan Revision Date Baru : "+e.getMessage(),2);
+            }
+        }
     }
 }

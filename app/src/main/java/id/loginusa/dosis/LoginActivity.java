@@ -27,9 +27,7 @@ import android.widget.Toast;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -40,6 +38,7 @@ import id.loginusa.dosis.util.CryptoSHA1BASE64;
 import id.loginusa.dosis.util.Logging;
 import id.loginusa.dosis.util.LoginSession;
 import id.loginusa.dosis.util.StaticVar;
+import id.loginusa.dosis.util.Utility;
 import id.loginusa.dosis.util.externalconnection.openbravows.OpenbravoConnection;
 import id.loginusa.dosis.util.externalconnection.openbravows.OpenbravoLoginService;
 import id.loginusa.dosis.util.json.JsonBuilder;
@@ -82,6 +81,8 @@ public class LoginActivity extends AppCompatActivity /*implements LoaderCallback
         // Set up the login form.
         mUserView = (AutoCompleteTextView) findViewById(R.id.username);
         //populateAutoComplete();
+
+       // mUserView.setNex
 
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -337,20 +338,22 @@ public class LoginActivity extends AppCompatActivity /*implements LoaderCallback
             JsonArray data = new JsonArray();
             try {
                 // Simulate network access.
-                Thread.sleep(1000);
+                Thread.sleep(100);
                 OpenbravoConnection dc = new OpenbravoConnection();
                 Map<String,String> param = new HashMap<String,String>();
-                param.put("username",mUsername);
-                param.put("pss", CryptoSHA1BASE64.hash(mPassword));
+
+                param.put(StaticVar.SERVER_WS_USER_USERNAME_PARAM,mUsername);
+                param.put(StaticVar.SERVER_WS_USER_PASS_PARAM, CryptoSHA1BASE64.hash(mPassword));
+                param.put(StaticVar.SERVER_WS_CREDENT_REQCODE, Utility.generateApiCode(StaticVar.SERVER_WS_SERVICE_LOGIN,StaticVar.SERVER_WS_LOGIN_SERVICE_CODE));
                 JsonObject jsonResponse = dc.sendRequest(new OpenbravoLoginService(),param);
 
                 int status_code = JsonBuilder.getJsonStatusCode(jsonResponse);
-                Logging.log('d',"status_code","status_code : "+status_code);
-                Logging.log('d',"Response","Login activity : "+jsonResponse.toString());
+//                Logging.log('d',"status_code","status_code : "+status_code);
+//                Logging.log('d',"Response","Login activity : "+jsonResponse.toString());
 
-                if (status_code == StaticVar.OB_RESPONSE_CODE_AUTH_SUCCES) {
+                if (status_code == StaticVar.OB_RESPONSE_CODE_SUCCES) {
                     messageErr = getString(R.string.login_success);
-                    loginSession.createLoginSession(jsonResponse);
+                    loginSession.setLoginSession(jsonResponse);
 
                     return true;
                 } else if (status_code == StaticVar.OB_RESPONSE_SERVER_ERROR) {
@@ -395,7 +398,7 @@ public class LoginActivity extends AppCompatActivity /*implements LoaderCallback
 
             if (success) {
                 Toast.makeText(LoginActivity.this,messageErr, Toast.LENGTH_SHORT).show();
-                //loginSession.createLoginSession("loginusa","fachmi","mfachmirizal@loginusa.com","nckhl.jpeg");
+                //loginSession.setLoginSession("loginusa","fachmi","mfachmirizal@loginusa.com","nckhl.jpeg");
                 //kasih intent result, passing message error
                 finish();
             } else {

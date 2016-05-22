@@ -6,6 +6,7 @@
 package id.loginusa.dosis.util.json.entity;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.Serializable;
@@ -152,6 +153,14 @@ public class UserData {
         List<UserData> logJData = new Gson().fromJson(JsonBuilder.extractJsonData(jBuilder) , listType);
         return logJData;
     }
+
+    public static List<UserData> getList(JsonObject jsonObject) {
+        Type listType = new TypeToken<List<UserData>>() {}.getType();
+        List<UserData> logJData = new Gson().fromJson(JsonBuilder.extractJsonData(jsonObject) , listType);
+        return logJData;
+    }
+
+
 
 }
 

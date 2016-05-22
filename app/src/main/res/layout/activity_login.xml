@@ -41,7 +41,10 @@
                     android:hint="@string/prompt_username"
                     android:inputType="textEmailAddress"
                     android:maxLines="1"
-                    android:singleLine="true" />
+                    android:singleLine="true"
+                    android:nextFocusDown="@+id/password"
+                    android:nextFocusForward="@+id/password"
+                    />
 
             </android.support.design.widget.TextInputLayout>
 

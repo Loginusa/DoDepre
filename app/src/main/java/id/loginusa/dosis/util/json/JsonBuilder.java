@@ -61,15 +61,28 @@ public class JsonBuilder {
         return gson.toJson(new JsonBuilder(response));
     }
 
-    /**
-     * Method untuk mengkonversi object yg sudah di instansiasi ke JSON
+ /*   *//**
+     * Method untuk mengkonversi object yg sudah di instansiasi ke JSON String
      * @param status_code override status_code
      * @return
-     */
+     *//*
     public String toJson(int status_code){
         Gson gson = new Gson();
         response.setStatus_code(status_code);
         return gson.toJson(new JsonBuilder(response));
+    }*/
+
+    /**
+     * Method untuk mengkonversi object yg sudah di instansiasi ke JSON Object
+     * @param status_code override status_code
+     * @return
+     */
+    public JsonObject toJson(int status_code){
+        Gson gson = new Gson();
+        JsonParser parser = new JsonParser();
+        response.setStatus_code(status_code);
+        JsonObject o = parser.parse(gson.toJson(new JsonBuilder(response))).getAsJsonObject();
+        return o;
     }
 
     /**
@@ -78,10 +91,12 @@ public class JsonBuilder {
      * @param status_code override status_code
      * @return
      */
-    static public String toJson(List datalist,int status_code) {
+    static public JsonObject toJson(List datalist,int status_code) {
         Gson gson = new Gson();
         JsonResponse response = new JsonResponse(datalist, status_code);
-        return gson.toJson(new JsonBuilder(response));
+        JsonParser parser = new JsonParser();
+        JsonObject o = parser.parse(gson.toJson(new JsonBuilder(response))).getAsJsonObject();
+        return o;
     }
 
     /**
@@ -90,10 +105,12 @@ public class JsonBuilder {
      * @param status_code override status_code
      * @return
      */
-    static public String toJson(Object obj,int status_code) {
+    static public JsonObject toJson(Object obj,int status_code) {
         Gson gson = new Gson();
         JsonResponse response = new JsonResponse(obj, status_code);
-        return gson.toJson(new JsonBuilder(response));
+        JsonParser parser = new JsonParser();
+        JsonObject o = parser.parse(gson.toJson(new JsonBuilder(response))).getAsJsonObject();
+        return o;
     }
 
     /**
@@ -102,9 +119,10 @@ public class JsonBuilder {
      */
     public String extractJsonData() {
         Gson gson = new Gson();
-        String jsonString = getRawJsonData();
-        JsonParser parser = new JsonParser();
-        JsonObject o = parser.parse(jsonString).getAsJsonObject();
+        //String jsonString = toJsonObject();
+        //JsonParser parser = new JsonParser();
+        //JsonObject o = parser.parse(jsonString).getAsJsonObject();
+        JsonObject o  = getJsonObject();
         o = o.get("response").getAsJsonObject();
 
         return o.get("data").toString();
@@ -127,7 +145,7 @@ public class JsonBuilder {
      */
     static public String extractJsonData(JsonBuilder jBuilder) {
         JsonParser parser = new JsonParser();
-        JsonObject o = parser.parse(jBuilder.toJson(jBuilder.getStatus_code())).getAsJsonObject();
+        JsonObject o = parser.parse(jBuilder.toJson(jBuilder.getStatus_code()).toString()).getAsJsonObject();
         o = o.get("response").getAsJsonObject();
 
         return o.get("data").toString();
@@ -165,9 +183,10 @@ public class JsonBuilder {
      * @return status_code
      */
     public int getJsonStatusCode() {
-        String jsonString = getRawJsonData();
-        JsonParser parser = new JsonParser();
-        JsonObject o = parser.parse(jsonString).getAsJsonObject();
+        //String jsonString = toJsonObject();
+        //JsonParser parser = new JsonParser();
+        //JsonObject o = parser.parse(jsonString).getAsJsonObject();
+        JsonObject o = getJsonObject();
         o = o.get("response").getAsJsonObject();
         return  o.get("status_code").getAsInt();
     }
@@ -191,7 +210,7 @@ public class JsonBuilder {
      */
     static public int getJsonStatusCode(JsonBuilder jBuilder) {
         JsonParser parser = new JsonParser();
-        JsonObject o = parser.parse(jBuilder.toJson(jBuilder.getStatus_code())).getAsJsonObject();
+        JsonObject o = parser.parse(jBuilder.toJson(jBuilder.getStatus_code()).toString()).getAsJsonObject();
         o = o.get("response").getAsJsonObject();
         return o.get("status_code").getAsInt();
     }
@@ -210,25 +229,29 @@ public class JsonBuilder {
 
     /**
      * Method untuk mendapatkan String JSON Data mentah
-     * @return String JSON Data
+     * @return JsonObject JSON Data
      */
-    public String getRawJsonData() {
+    public JsonObject getJsonObject() {
         Gson gson = new Gson();
         JsonParser parser = new JsonParser();
         JsonObject o = parser.parse(gson.toJson(new JsonBuilder(response))).getAsJsonObject();
-        return o.toString();
+        return o;
     }
-
-
 
     /**
      * Method untuk mendapatkan String JSON Data mentah
      * @param jBuilder Instance JsonBuilder
-     * @return String JSON Data
+     * @return JsonObject JSON Data
      */
-    static public String getRawJsonData(JsonBuilder jBuilder) {
+    static public JsonObject getJsonObject(JsonBuilder jBuilder) {
         JsonParser parser = new JsonParser();
-        JsonObject o = parser.parse(jBuilder.toJson(jBuilder.getStatus_code())).getAsJsonObject();
-        return o.toString();
+        JsonObject o = parser.parse(jBuilder.toJson(jBuilder.getStatus_code()).toString()).getAsJsonObject();
+        return o;
+    }
+
+    static public JsonObject getJsonObject(String s) {
+        JsonParser parser = new JsonParser();
+        JsonObject o = parser.parse(s).getAsJsonObject();
+        return o;
     }
 }

@@ -3,15 +3,18 @@ package id.loginusa.dosis.util;
 import android.content.Context;
 import android.content.Intent;
 
+import com.google.api.client.json.Json;
 import com.google.gson.JsonObject;
 
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
 import id.loginusa.dosis.LoginActivity;
+import id.loginusa.dosis.backgroundprocess.intentservices.updateserveraccinfo.ExecuteUpdateServerAccInfoIntentService;
 import id.loginusa.dosis.util.json.JsonBuilder;
 import id.loginusa.dosis.util.json.entity.UserData;
 
@@ -21,9 +24,6 @@ import id.loginusa.dosis.util.json.entity.UserData;
 
 
 
-/* TODO: UBAH PENYIMPINAN SESSION DENGAN MENGANDALKAN OBJECT MAPPING DARI JSON OBJECT KE JAVA OBJECT, dan sebaliknya jadi semuanya jadi JSON
-
- */
 public class LoginSession extends SessionManager{
 
     // User Info
@@ -57,37 +57,29 @@ public class LoginSession extends SessionManager{
      *
      */
     //public void createLoginSession(String username,String name,String email, String profpic){
-    public void createLoginSession(JsonObject data){
-        // Storing login value as TRUE
+    public JsonObject setLoginSession(JsonObject data){
+        try {
+            editor.putString(USER_DATA,data.toString());
+            // commit changes
+            editor.commit();
 
-/*        editor.putBoolean(USER_IS_LOGIN, true);
-        editor.putString(USER_PROFPIC, data.get("profpic").getAsString() );
-        editor.putString(USER_REVISION_DATE, data.get("revision_date").getAsString() );
-        editor.putString(USER_AD_USER_ID, data.get("ad_user_id").getAsString() );
-
-        editor.putString(USER_USERNAME, data.get("username").getAsString());
-        editor.putString(USER_NAME, data.get("name").getAsString());
-        editor.putString(USER_EMAIL, data.get("email").getAsString());
-
-        editor.putString(USER_PHONE, data.get("phone").getAsString());       //ini phone hp, phone rumah / tempat tugas menyatu di address
-        editor.putString(USER_ALTPHONE, data.get("altphone").getAsString()); //alternatif phone hp
-        editor.putString(USER_FAX, data.get("fax").getAsString());
-
-        //bagaimana memecah lat long nya ?
-        editor.putString(USER_ADDRESS, data.get("address").getAsString()); // isinya JSON*/
-
-
-        editor.putString(USER_DATA,data.toString());
-        // commit changes
-        editor.commit();
-
-        editor.putBoolean(USER_IS_LOGIN, isLoggedIn());
-        //re commit for set is_login
-        editor.commit();
-
+            editor.putBoolean(USER_IS_LOGIN, isLoggedIn());
+            //re commit for set is_login
+            editor.commit();
+        } catch (Exception e) {
+            Logging.toast(_context,"Error : "+e.getMessage(),1);
+        }
+        return data;
     }
 
-
+    /**
+     * get raw UserData in Session
+     * @return JSON User Data
+     */
+    public String getUserData() {
+        UserData user = new UserData();
+        return pref.getString(USER_DATA, JsonBuilder.toJson(user,0).toString());
+    }
 
     /**
      * check this user login status, if not login, the redirect to login page
@@ -129,8 +121,12 @@ public class LoginSession extends SessionManager{
      * **/
     // Get Login State
     public boolean isLoggedIn(){
-        //return pref.getBoolean(USER_IS_LOGIN, false);
         UserData user = getUserDetails();
+        try {
+            return user.isIsLogin();
+        } catch (Exception e) {
+            Logging.toast(_context,"Error : "+e.getMessage(),1);
+        }
         return user.isIsLogin();
     }
 
@@ -154,10 +150,47 @@ public class LoginSession extends SessionManager{
 
     public UserData getUserDetails(){
         UserData user = new UserData();
-        List<UserData> userList = UserData.getList(pref.getString(USER_DATA, JsonBuilder.toJson(user,0)));
-        if (userList != null) {
-            user = userList.get(0);
+        try {
+            List<UserData> userList = UserData.getList(pref.getString(USER_DATA, JsonBuilder.toJson(user,0).toString()));
+            if (userList != null) {
+                user = userList.get(0);
+            }
+        } catch (Exception e) {
+            Logging.toast(_context,"Error : "+e.getMessage(),1);
         }
         return user;
     }
+
+    //Method yang berkenaan pemutakhiran UserData
+    public void updateAccInfo(JsonObject newJsonUserData) throws Exception{
+        setLoginSession(newJsonUserData);
+//            UserData prevUserData = getUserDetails();
+//            UserData newUserData = UserData.getList(newJsonUserData).get(0);
+//            prevUserData = newUserData;
+
+    }
+
+    /**
+     * sama seperti @link#updateAccInfo(JsonObject newJsonUserData) hanya ini versi static, yang dapat di panggil langsung
+     * @param userData new UserData
+     * @param ctx Context application
+     */
+    static public void updateAccInfo(JsonObject userData,Context ctx) {
+        new LoginSession(ctx).setLoginSession(userData);
+    }
+
+    public void updateServerAccInfo(JsonObject newJsonUserData) throws Exception{
+        setLoginSession(newJsonUserData);
+        ExecuteUpdateServerAccInfoIntentService.startUpdateServerAccInfoIntentService(_context,newJsonUserData.toString());
+    }
+
+    public void setNewRevisionDate(Date newDate) {
+        UserData user = getUserDetails();
+        user.setRevision_date(newDate);
+        setLoginSession(JsonBuilder.toJson(user,1));
+    }
+
+    // TODO: kerjakan sisa method di bawah terkait pemutakhiran UserData
+
+    //refreshAccountStatus {  ada kemungkinan akan menanggil intent service yang akan menjalankan background proses pengecekan pembaharuan account }
 }

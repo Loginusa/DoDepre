@@ -6,6 +6,7 @@
 package id.loginusa.dosis.util.json.entity;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
@@ -20,19 +21,21 @@ import id.loginusa.dosis.util.json.JsonBuilder;
  */
 public class Address {
     private boolean isActive;
-    
+
     private String name;
     private String address;
-    
+
     private BigDecimal latitude;
     private BigDecimal longitude;
-    
+
     private String phone;
-    
+
     private boolean ishome;
     private boolean iswork;
 
-    public Address(boolean isActive, String name, String address, BigDecimal latitude, BigDecimal longitude, String phone, boolean ishome, boolean iswork) {
+    private String id;
+
+    public Address(boolean isActive, String name, String address, BigDecimal latitude, BigDecimal longitude, String phone, boolean ishome, boolean iswork,String id) {
         this.isActive = isActive;
         this.name = name;
         this.address = address;
@@ -41,9 +44,16 @@ public class Address {
         this.phone = phone;
         this.ishome = ishome;
         this.iswork = iswork;
+        this.id=id;
     }
-    
-    
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public boolean isIsActive() {
         return isActive;
@@ -125,5 +135,10 @@ public class Address {
         List<Address> logJData = new Gson().fromJson(JsonBuilder.extractJsonData(jBuilder) , listType);
         return logJData;
     }
-    
+
+    public static List<Address> getList(JsonObject jsonObject) {
+        Type listType = new TypeToken<List<UserData>>() {}.getType();
+        List<Address> logJData = new Gson().fromJson(JsonBuilder.extractJsonData(jsonObject) , listType);
+        return logJData;
+    }
 }

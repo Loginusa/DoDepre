@@ -1,5 +1,8 @@
 package id.loginusa.dosis.util.externalconnection.openbravows;
 
+/**
+ * Created by mfachmirizal on 22-May-16.
+ */
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpRequestInitializer;
@@ -18,13 +21,14 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.util.Map;
 
+import id.loginusa.dosis.util.Logging;
 import id.loginusa.dosis.util.StaticVar;
 import id.loginusa.dosis.util.externalconnection.BaseGenericUrl;
 
 /**
  * Created by mfachmirizal on 10-May-16.
  */
-public class OpenbravoLoginService implements OpenbravoWebService {
+public class OpenbravoDataService implements OpenbravoWebService {
     static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
     static final JsonFactory JSON_FACTORY = new JacksonFactory();
 
@@ -37,29 +41,25 @@ public class OpenbravoLoginService implements OpenbravoWebService {
                         request.setParser(new JsonObjectParser(JSON_FACTORY));
                     }
                 });
-        String strparamuser = "";
-        String strparampass = "";
+        String strparamdata = "";
         String strreqcode = "";
         for(Map.Entry<String, String> entry : param.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
-            if (key.equals(StaticVar.SERVER_WS_USER_USERNAME_PARAM)) {
-                strparamuser+=value;
-            }
-            if (key.equals(StaticVar.SERVER_WS_USER_PASS_PARAM)) {
-                strparampass+=value;
+            if (key.equals(StaticVar.SERVER_WS_JSON_USER_DATA_PARAM)) {
+                strparamdata+=value;
             }
             if (key.equals(StaticVar.SERVER_WS_CREDENT_REQCODE)) {
                 strreqcode+=value;
             }
         }
 
-        if (strparamuser.isEmpty() || strparamuser.length() ==0 ||strreqcode.length() ==0 ||strreqcode.isEmpty()) {
-            throw new IOException("Parameter User / ReqCode tidak boleh Kosong !");
+        if (strparamdata.isEmpty() || strparamdata.length() ==0 ||strreqcode.length() ==0 ||strreqcode.isEmpty()) {
+            throw new IOException("Parameter Data / ReqCode tidak boleh Kosong !");
         }
 
         //String strUrl = StaticVar.SERVER_URL+"/"+StaticVar.SERVER_CONTEXT+"/org.openbravo.service.json.jsonrest/ADUser?_where=username='"+strparamuser+"'&"+StaticVar.SERVER_WS_CREDENT;
-        String strUrl = StaticVar.SERVER_URL+"/"+StaticVar.SERVER_CONTEXT+StaticVar.SERVER_WS_SERVICE_LOGIN;
+        String strUrl = StaticVar.SERVER_URL+"/"+StaticVar.SERVER_CONTEXT+StaticVar.SERVER_WS_SERVICE_DATA;
 
         //URL myURL = new URL(strUrl);
 
@@ -67,11 +67,10 @@ public class OpenbravoLoginService implements OpenbravoWebService {
 
         setMandatoryParam(url);
         url.put(StaticVar.SERVER_WS_CREDENT_REQCODE,strreqcode);
-        url.put(StaticVar.SERVER_WS_USER_USERNAME_PARAM,strparamuser);
-        url.put(StaticVar.SERVER_WS_USER_PASS_PARAM,strparampass);
-        //url.put("fields", "items(id,url,object(content,plusoners/totalItems))");
-//        Logging.log('e',"terst1",StaticVar.SERVER_WS_CREDENT_L_PARAM+" | "+StaticVar.SERVER_WS_CREDENT_L_VAL);
-//        Logging.log('e',"terst2",StaticVar.SERVER_WS_CREDENT_P_PARAM+" | "+StaticVar.SERVER_WS_CREDENT_P_VAL);
+        url.put(StaticVar.SERVER_WS_JSON_USER_DATA_PARAM,strparamdata);
+
+        Logging.log('d',"terst1",url.toString());
+        Logging.log('d',"terst2",strparamdata);
 
         HttpRequest request = requestFactory.buildGetRequest(url);
 

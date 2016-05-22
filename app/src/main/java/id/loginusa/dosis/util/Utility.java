@@ -62,4 +62,9 @@ public class Utility {
             fm.popBackStack();
         }
     }
+
+    public static String generateApiCode(String source,int servercode) throws Exception{
+        String sss = source+StaticVar.BUMBU+servercode;
+        return CryptoSHA1BASE64.hash(sss);
+    }
 }

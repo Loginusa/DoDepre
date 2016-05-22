@@ -80,7 +80,7 @@ public class GCMRegActivity extends AppCompatActivity {
                     finish();
                 } else {
                     tv_status.setText(getString(R.string.token_error_message));
-                    Logging.toast(context,"WEW",2);
+                    Logging.toast(context,getString(R.string.token_error_message),2);
                 }
             }
         };
