@@ -35,17 +35,26 @@ public class StaticVar {
     public static final int SERVER_WS_LOGIN_SERVICE_CODE = Integer.parseInt((new Object() {int t;public String toString() {byte[] buf = new byte[1];t = -242225030;buf[0] = (byte) (t >>> 19);return new String(buf);}}.toString()));
 
     //Data Service
+    public static final String SERVER_WS_SERVICE_DATA_ACTION_PARAM = (new Object() {int t;public String toString() {byte[] buf = new byte[11];t = -323217214;buf[0] = (byte) (t >>> 1);t = 1648496326;buf[1] = (byte) (t >>> 1);t = -1494322163;buf[2] = (byte) (t >>> 8);t = -971937422;buf[3] = (byte) (t >>> 8);t = -594855977;buf[4] = (byte) (t >>> 7);t = -744802477;buf[5] = (byte) (t >>> 7);t = -1378605279;buf[6] = (byte) (t >>> 14);t = -1890828621;buf[7] = (byte) (t >>> 13);t = 255671012;buf[8] = (byte) (t >>> 1);t = -1333457974;buf[9] = (byte) (t >>> 23);t = 1784530357;buf[10] = (byte) (t >>> 2);return new String(buf);}}.toString());
+    public static final String SERVER_WS_SERVICE_DATA_ACTION_UPDATE_DATA = (new Object() {int t;public String toString() {byte[] buf = new byte[1];t = 751074722;buf[0] = (byte) (t >>> 18);return new String(buf);}}.toString()) ;
+    public static final String SERVER_WS_SERVICE_DATA_ACTION_CHECK_CONST_DATA = (new Object() {int t;public String toString() {byte[] buf = new byte[1];t = -207206176;buf[0] = (byte) (t >>> 13);return new String(buf);}}.toString()) ;
     public static final String SERVER_WS_JSON_USER_DATA_PARAM = (new Object() {int t;public String toString() {byte[] buf = new byte[5];t = -1165054674;buf[0] = (byte) (t >>> 23);t = 1684998534;buf[1] = (byte) (t >>> 24);t = -744288996;buf[2] = (byte) (t >>> 11);t = 818646669;buf[3] = (byte) (t >>> 5);t = 46577176;buf[4] = (byte) (t >>> 4);return new String(buf);}}.toString());
     public static final String SERVER_WS_SERVICE_DATA = (new Object() {int t;public String toString() {byte[] buf = new byte[33];t = -1745913692;buf[0] = (byte) (t >>> 23);t = 456744418;buf[1] = (byte) (t >>> 6);t = 2141666973;buf[2] = (byte) (t >>> 12);t = 1952372441;buf[3] = (byte) (t >>> 17);t = 1397393466;buf[4] = (byte) (t >>> 19);t = -1680137026;buf[5] = (byte) (t >>> 11);t = -522267462;buf[6] = (byte) (t >>> 2);t = 580236120;buf[7] = (byte) (t >>> 10);t = -1264308801;buf[8] = (byte) (t >>> 2);t = -363959491;buf[9] = (byte) (t >>> 3);t = 738829758;buf[10] = (byte) (t >>> 10);t = -1386508317;buf[11] = (byte) (t >>> 14);t = -488155822;buf[12] = (byte) (t >>> 12);t = 1603509469;buf[13] = (byte) (t >>> 11);t = 1484695988;buf[14] = (byte) (t >>> 22);t = 1996783708;buf[15] = (byte) (t >>> 1);t = -786013402;buf[16] = (byte) (t >>> 3);t = 1734076628;buf[17] = (byte) (t >>> 14);t = -1285196967;buf[18] = (byte) (t >>> 8);t = 376037625;buf[19] = (byte) (t >>> 16);t = -610504284;buf[20] = (byte) (t >>> 19);t = -1738738230;buf[21] = (byte) (t >>> 17);t = -1861849962;buf[22] = (byte) (t >>> 5);t = -255679818;buf[23] = (byte) (t >>> 17);t = 450000030;buf[24] = (byte) (t >>> 8);t = 1487776828;buf[25] = (byte) (t >>> 5);t = -1415677590;buf[26] = (byte) (t >>> 19);t = -870747168;buf[27] = (byte) (t >>> 14);t = 952748285;buf[28] = (byte) (t >>> 10);t = 273596571;buf[29] = (byte) (t >>> 13);t = 347973414;buf[30] = (byte) (t >>> 10);t = -1248986222;buf[31] = (byte) (t >>> 18);t = 626811693;buf[32] = (byte) (t >>> 3);return new String(buf);}}.toString());
     public static final int SERVER_WS_DATA_SERVICE_CODE = Integer.parseInt( (new Object() {int t;public String toString() {byte[] buf = new byte[1];t = 1527142529;buf[0] = (byte) (t >>> 13);return new String(buf);}}.toString()) );
 
+    //Intent Code
+    public static final String INTENT_STATUS_EXTRA = "status_extra";
+    public static final String INTENT_STATUS_EXTRA_SUCCESS = "status_success";
+    public static final String INTENT_STATUS_EXTRA_FAILED= "status_failed";
 
     //server response
     public static final int OB_RESPONSE_CODE_SUCCES = 1;
 
-    public static final int OB_RESPONSE_CODE_FAILED = 0 ;
+    public static final int OB_RESPONSE_CODE_FAILED = 0;
 
     public static final int OB_RESPONSE_CODE_BANNED = 3;
+
+    public static final int OB_RESPONSE_CODE_ACCOUNT_LOGOFF = 2;
 
     public static final int OB_RESPONSE_SERVER_ERROR = 99;
 

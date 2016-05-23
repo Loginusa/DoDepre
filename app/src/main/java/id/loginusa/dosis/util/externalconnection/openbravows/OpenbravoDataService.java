@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import id.loginusa.dosis.util.Logging;
+import id.loginusa.dosis.util.SessionManager;
 import id.loginusa.dosis.util.StaticVar;
 import id.loginusa.dosis.util.externalconnection.BaseGenericUrl;
 
@@ -43,6 +44,8 @@ public class OpenbravoDataService implements OpenbravoWebService {
                 });
         String strparamdata = "";
         String strreqcode = "";
+        String stractioncode = "";
+        String strtoken = "";
         for(Map.Entry<String, String> entry : param.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
@@ -52,25 +55,33 @@ public class OpenbravoDataService implements OpenbravoWebService {
             if (key.equals(StaticVar.SERVER_WS_CREDENT_REQCODE)) {
                 strreqcode+=value;
             }
+            if (key.equals(StaticVar.SERVER_WS_SERVICE_DATA_ACTION_PARAM)) {
+                stractioncode+=value;
+            }
+            if (key.equals(SessionManager.CURRENT_TOKEN)) {
+                strtoken+=value;
+            }
         }
 
-        if (strparamdata.isEmpty() || strparamdata.length() ==0 ||strreqcode.length() ==0 ||strreqcode.isEmpty()) {
-            throw new IOException("Parameter Data / ReqCode tidak boleh Kosong !");
+        if (strparamdata.isEmpty() || strparamdata.length() ==0 ||strreqcode.length() ==0 ||strreqcode.isEmpty()
+                || stractioncode.isEmpty() || stractioncode.length() ==0
+                || strtoken.isEmpty() || strtoken.length() ==0)  {
+            throw new IOException("Parameter Data / ReqCode / Action Code / Token tidak boleh Kosong !");
         }
 
-        //String strUrl = StaticVar.SERVER_URL+"/"+StaticVar.SERVER_CONTEXT+"/org.openbravo.service.json.jsonrest/ADUser?_where=username='"+strparamuser+"'&"+StaticVar.SERVER_WS_CREDENT;
         String strUrl = StaticVar.SERVER_URL+"/"+StaticVar.SERVER_CONTEXT+StaticVar.SERVER_WS_SERVICE_DATA;
-
-        //URL myURL = new URL(strUrl);
 
         BaseGenericUrl url = new BaseGenericUrl(strUrl);
 
         setMandatoryParam(url);
         url.put(StaticVar.SERVER_WS_CREDENT_REQCODE,strreqcode);
+        url.put(StaticVar.SERVER_WS_SERVICE_DATA_ACTION_PARAM,stractioncode);
         url.put(StaticVar.SERVER_WS_JSON_USER_DATA_PARAM,strparamdata);
+        //token untuk check konsistensi data server dan client
+        url.put(SessionManager.CURRENT_TOKEN,strtoken);
 
-        Logging.log('d',"terst1",url.toString());
-        Logging.log('d',"terst2",strparamdata);
+//        Logging.log('d',"terst1",url.toString());
+//        Logging.log('d',"terst2",strparamdata);
 
         HttpRequest request = requestFactory.buildGetRequest(url);
 

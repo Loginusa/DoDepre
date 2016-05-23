@@ -37,6 +37,7 @@ import java.util.Map;
 import id.loginusa.dosis.util.CryptoSHA1BASE64;
 import id.loginusa.dosis.util.Logging;
 import id.loginusa.dosis.util.LoginSession;
+import id.loginusa.dosis.util.SessionManager;
 import id.loginusa.dosis.util.StaticVar;
 import id.loginusa.dosis.util.Utility;
 import id.loginusa.dosis.util.externalconnection.openbravows.OpenbravoConnection;
@@ -333,8 +334,7 @@ public class LoginActivity extends AppCompatActivity /*implements LoaderCallback
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-            //JSONArray data = new JSONArray();
+            // Melakukan otentifikasi ke server
             JsonArray data = new JsonArray();
             try {
                 // Simulate network access.
@@ -344,6 +344,7 @@ public class LoginActivity extends AppCompatActivity /*implements LoaderCallback
 
                 param.put(StaticVar.SERVER_WS_USER_USERNAME_PARAM,mUsername);
                 param.put(StaticVar.SERVER_WS_USER_PASS_PARAM, CryptoSHA1BASE64.hash(mPassword));
+                param.put(SessionManager.CURRENT_TOKEN, loginSession.getCurrentToken());
                 param.put(StaticVar.SERVER_WS_CREDENT_REQCODE, Utility.generateApiCode(StaticVar.SERVER_WS_SERVICE_LOGIN,StaticVar.SERVER_WS_LOGIN_SERVICE_CODE));
                 JsonObject jsonResponse = dc.sendRequest(new OpenbravoLoginService(),param);
 

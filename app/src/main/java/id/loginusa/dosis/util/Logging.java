@@ -17,6 +17,50 @@ public class Logging {
      * @param text logging text
      */
     public static void log(char type,String tag,String text) {
+        switch (type) {
+            case 'i':
+                Log.i(tag, text);
+                break;
+            case 'd':
+                Log.d(tag, text);
+                break;
+            case 'e':
+                Log.e(tag, text);
+                break;
+            case 'v':
+                Log.v(tag, text);
+                break;
+            default:
+                throw new RuntimeException("Logging type not correct");
+        }
+
+    }
+
+    /**
+     * Toast for Debugging
+     * @param cont Android Context
+     * @param message Toast Message
+     * @param duration duration  <= 1 = SHORT , > 1 = LONG
+     */
+    public static void toast(Context cont, String message, int duration) {
+        if (duration <= 1) {
+            duration = Toast.LENGTH_SHORT;
+        } else {
+            duration = Toast.LENGTH_LONG;
+        }
+
+        Toast.makeText(cont, message, duration).show();
+
+    }
+
+    // true logger / show message
+    /**
+     *
+     * @param type logging type (i/d/e/v)
+     * @param tag logging tag
+     * @param text logging text
+     */
+    public static void debugLog(char type,String tag,String text) {
         if (IS_LOG_ACTIVE) {
             switch (type) {
                 case 'i':
@@ -43,7 +87,7 @@ public class Logging {
      * @param message Toast Message
      * @param duration duration  <= 1 = SHORT , > 1 = LONG
      */
-    public static void toast(Context cont, String message, int duration) {
+    public static void debugToast(Context cont, String message, int duration) {
         if (IS_LOG_ACTIVE) {
             if (duration <= 1) {
                 duration = Toast.LENGTH_SHORT;

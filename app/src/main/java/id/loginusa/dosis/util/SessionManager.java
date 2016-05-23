@@ -26,7 +26,7 @@ public class SessionManager {
     // All Shared Preferences Keys
     //token
     public static final String SENT_TOKEN_TO_SERVER = "sentTokenToServer";
-    public static final String CURRENT_TOKEN = "sentRegidToServer";
+    public static final String CURRENT_TOKEN = "currentToken";
     public static final String CURRENT_INSTANCE_ID = "instanceid";
 
 

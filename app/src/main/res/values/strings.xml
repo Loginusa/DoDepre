@@ -35,4 +35,8 @@
     <string name="incorrect_login">Incorrect User / Password</string>
     <string name="login_success">Login Success</string>
     <string name="cant_connect_to_ob">Can\'t connect to server</string>
+    <string name="change_data_succes">Data berhasil di rubah</string>
+    <string name="failed_to_get_new_revdate">"Gagal mendapatkan Revision Date Baru : "</string>
+    <string name="error_check_consistence_data">Error Check Konsistensi data</string>
+    <string name="error_update_data">Error Update Data</string>
 </resources>

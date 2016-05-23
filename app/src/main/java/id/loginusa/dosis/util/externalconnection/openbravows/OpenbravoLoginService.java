@@ -18,6 +18,7 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.util.Map;
 
+import id.loginusa.dosis.util.SessionManager;
 import id.loginusa.dosis.util.StaticVar;
 import id.loginusa.dosis.util.externalconnection.BaseGenericUrl;
 
@@ -40,6 +41,7 @@ public class OpenbravoLoginService implements OpenbravoWebService {
         String strparamuser = "";
         String strparampass = "";
         String strreqcode = "";
+        String strtoken = "";
         for(Map.Entry<String, String> entry : param.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
@@ -52,26 +54,25 @@ public class OpenbravoLoginService implements OpenbravoWebService {
             if (key.equals(StaticVar.SERVER_WS_CREDENT_REQCODE)) {
                 strreqcode+=value;
             }
+            if (key.equals(SessionManager.CURRENT_TOKEN)) {
+                strtoken+=value;
+            }
         }
 
-        if (strparamuser.isEmpty() || strparamuser.length() ==0 ||strreqcode.length() ==0 ||strreqcode.isEmpty()) {
-            throw new IOException("Parameter User / ReqCode tidak boleh Kosong !");
+        if (strparamuser.isEmpty() || strparamuser.length() ==0 ||strreqcode.length() ==0 ||strreqcode.isEmpty()
+                || strtoken.isEmpty() || strtoken.length() ==0) {
+            throw new IOException("Error : Parameter User / ReqCode / Token tidak boleh Kosong !");
         }
 
-        //String strUrl = StaticVar.SERVER_URL+"/"+StaticVar.SERVER_CONTEXT+"/org.openbravo.service.json.jsonrest/ADUser?_where=username='"+strparamuser+"'&"+StaticVar.SERVER_WS_CREDENT;
         String strUrl = StaticVar.SERVER_URL+"/"+StaticVar.SERVER_CONTEXT+StaticVar.SERVER_WS_SERVICE_LOGIN;
-
-        //URL myURL = new URL(strUrl);
-
         BaseGenericUrl url = new BaseGenericUrl(strUrl);
 
         setMandatoryParam(url);
         url.put(StaticVar.SERVER_WS_CREDENT_REQCODE,strreqcode);
         url.put(StaticVar.SERVER_WS_USER_USERNAME_PARAM,strparamuser);
         url.put(StaticVar.SERVER_WS_USER_PASS_PARAM,strparampass);
-        //url.put("fields", "items(id,url,object(content,plusoners/totalItems))");
-//        Logging.log('e',"terst1",StaticVar.SERVER_WS_CREDENT_L_PARAM+" | "+StaticVar.SERVER_WS_CREDENT_L_VAL);
-//        Logging.log('e',"terst2",StaticVar.SERVER_WS_CREDENT_P_PARAM+" | "+StaticVar.SERVER_WS_CREDENT_P_VAL);
+        url.put(SessionManager.CURRENT_TOKEN,strtoken);
+
 
         HttpRequest request = requestFactory.buildGetRequest(url);
 

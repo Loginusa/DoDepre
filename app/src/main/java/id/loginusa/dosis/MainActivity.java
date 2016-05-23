@@ -34,9 +34,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import id.loginusa.dosis.backgroundprocess.intentservices.updateserveraccinfo.ExecuteUpdateServerAccInfoIntentService;
+import id.loginusa.dosis.backgroundprocess.intentservices.dataservice.ExecuteServerDataServiceIntentService;
 import id.loginusa.dosis.util.Logging;
 import id.loginusa.dosis.util.LoginSession;
+import id.loginusa.dosis.util.StaticVar;
 import id.loginusa.dosis.util.json.JsonBuilder;
 import id.loginusa.dosis.util.json.entity.UserData;
 
@@ -51,7 +52,7 @@ public class MainActivity extends AppCompatActivity
     ActionBarDrawerToggle toggle;
 
     //BroadcastReceiver
-    private updateServerAccInfoBroadcastReceiver receiver;
+    private DataServiceBroadcastReceiver dataServiceBroadcastReceiver;
 
     //testing
     Button bt;
@@ -69,11 +70,6 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         loginSession = new LoginSession(getApplicationContext());
-
-        IntentFilter filter = new IntentFilter(ExecuteUpdateServerAccInfoIntentService.ACTION_UpdateServerAccInfo);
-        filter.addCategory(Intent.CATEGORY_DEFAULT);
-        receiver = new updateServerAccInfoBroadcastReceiver();
-        registerReceiver(receiver, filter);
 
         //TODO:Tambahkan pengecekan is login nanti, bila tidak login / password berubah, akan kembali ke guest screen
 
@@ -110,14 +106,15 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View v) {
                 //loginSession.clearSharedPreference();
                 //Logging.toast(MainActivity.this, "Dihapus", 1);
-                UserData user = loginSession.getUserDetails();
+/*                UserData user = loginSession.getUserDetails();
                 user.setName("Luhur Pambudi");
-                user.setProfpic("gambar1");
+                user.setProfpic("gambar33");*/
 
                 try {
-                    loginSession.updateServerAccInfo(JsonBuilder.toJson(user,1));
+  //                  loginSession.updateServerAccInfo(JsonBuilder.toJson(user,1));
+                    loginSession.refreshAccountInfo();
                 } catch (Exception e) {
-                    Logging.toast(MainActivity.this,"Error saat update : "+e.getMessage(),2);
+                    Logging.toast(MainActivity.this,"Error saat check : "+e.getMessage(),2);
                 }
 
 
@@ -237,7 +234,21 @@ public class MainActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         setDrawerMenuByRole();
-        Logging.toast(this, "ISI IS LOGIN : " + loginSession.isLoggedIn(), 1);
+
+        //register receiver
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ExecuteServerDataServiceIntentService.ACTION_UpdateServerAccInfo);
+        filter.addAction(ExecuteServerDataServiceIntentService.ACTION_CheckServerAccConsistency);
+        filter.addCategory(Intent.CATEGORY_DEFAULT);
+        dataServiceBroadcastReceiver = new DataServiceBroadcastReceiver();
+        registerReceiver(dataServiceBroadcastReceiver, filter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(dataServiceBroadcastReceiver);
+        Logging.toast(this, "Pause, matikan receiver",1);
     }
 
     public void setDrawerMenuByRole() {
@@ -247,7 +258,8 @@ public class MainActivity extends AppCompatActivity
 
         TextView navhead_name = (TextView) navigationView.getHeaderView(0).findViewById(R.id.navhead_name);
         TextView navhead_email = (TextView) navigationView.getHeaderView(0).findViewById(R.id.navhead_email);
-        if (loginSession.isLoggedIn()) {
+        //if (loginSession.isLoggedIn()) {
+        if (user.isIsLogin()) {
             navigationView.getMenu().setGroupVisible(R.id.gr_not_login, false);
             navigationView.getMenu().setGroupVisible(R.id.gr_is_login, true);
             navhead_name.setText(user.getName());
@@ -332,19 +344,40 @@ public class MainActivity extends AppCompatActivity
     }
 
     //broadcast receiver
-    public class updateServerAccInfoBroadcastReceiver extends BroadcastReceiver {
+    public class DataServiceBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             Bundle extras = intent.getExtras();
-            String strRevDate = (String) extras.get(ExecuteUpdateServerAccInfoIntentService.BROADCAST_REV_DATE);
-            JsonObject jRevDate = JsonBuilder.getJsonObject(strRevDate);
+            String resultResponse = (String) extras.get(StaticVar.INTENT_STATUS_EXTRA);
+            String resultAction = intent.getAction();
+            if (resultAction.equals(ExecuteServerDataServiceIntentService.ACTION_UpdateServerAccInfo) && resultResponse.equals(StaticVar.INTENT_STATUS_EXTRA_SUCCESS)) {
+                String strRevDate = (String) extras.get(ExecuteServerDataServiceIntentService.BROADCAST_REV_DATE);
+                JsonObject jRevDate = JsonBuilder.getJsonObject(strRevDate);
 
-            try {
-                Date newRevDate = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(jRevDate.getAsJsonObject("response").get("data").getAsJsonArray().get(0).getAsString());
-                loginSession.setNewRevisionDate(newRevDate);
-            } catch (ParseException e) {
-                Logging.toast(MainActivity.this,"Gagal mendapatkan Revision Date Baru : "+e.getMessage(),2);
+                try {
+                    Date newRevDate = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(jRevDate.getAsJsonObject("response").get("data").getAsJsonArray().get(0).getAsString());
+                    loginSession.setNewRevisionDate(newRevDate);
+                    Logging.toast(MainActivity.this, getString(R.string.change_data_succes), 2);
+                } catch (ParseException e) {
+                    Logging.toast(MainActivity.this, getString(R.string.failed_to_get_new_revdate) + e.getMessage(), 2);
+                }
+            } else if (resultAction.equals(ExecuteServerDataServiceIntentService.ACTION_CheckServerAccConsistency) && resultResponse.equals(StaticVar.INTENT_STATUS_EXTRA_SUCCESS)) {
+                boolean forceLogout = (boolean) extras.get(ExecuteServerDataServiceIntentService.IS_FORCE_LOGOUT);
+            if (forceLogout) {
+                    loginSession.logoutUser();
+                    finish();
+                    startActivity(getIntent());
+                } else {
+                    //tidak di logoff paksa ...
+                }
             }
+            else {
+                Logging.toast(MainActivity.this,"Error "+" : "+resultResponse,2);
+            }
+
         }
+
     }
+
+
 }

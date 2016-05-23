@@ -10,6 +10,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -37,10 +38,17 @@ public class JsonBuilder {
     public void setResponse(JsonResponse response) {
         this.response = response;
     }
-    
-    
-    public void add(Object data) {
-        this.response.add(data);
+
+
+    public void add(Object data) throws Exception{
+        if (data instanceof Collection<?>){
+            this.response.setDataList((List)data);
+        }
+        else if (data instanceof Object) {
+            this.response.add(data);
+        } else {
+            throw new Exception("Parameter JsonBuilder.add() Should Object or List Instance");
+        }
     }
     
     public int getStatus_code() {

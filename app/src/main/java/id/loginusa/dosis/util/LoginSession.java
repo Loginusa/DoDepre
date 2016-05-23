@@ -3,18 +3,13 @@ package id.loginusa.dosis.util;
 import android.content.Context;
 import android.content.Intent;
 
-import com.google.api.client.json.Json;
 import com.google.gson.JsonObject;
 
-import org.json.JSONObject;
-
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 import id.loginusa.dosis.LoginActivity;
-import id.loginusa.dosis.backgroundprocess.intentservices.updateserveraccinfo.ExecuteUpdateServerAccInfoIntentService;
+import id.loginusa.dosis.backgroundprocess.intentservices.dataservice.ExecuteServerDataServiceIntentService;
 import id.loginusa.dosis.util.json.JsonBuilder;
 import id.loginusa.dosis.util.json.entity.UserData;
 
@@ -25,24 +20,7 @@ import id.loginusa.dosis.util.json.entity.UserData;
 
 
 public class LoginSession extends SessionManager{
-
     // User Info
-    /*session static lama*/
-    /*//ldos_dosisaccount
-    private static final String USER_IS_LOGIN = "UserIsLoggedIn";
-    public static final String USER_PROFPIC = "profpic";
-    public static final String USER_REVISION_DATE = "revdate";
-    public static final String USER_AD_USER_ID = "aduserid";
-    //ad_user_id
-    public static final String USER_USERNAME = "username";
-    public static final String USER_NAME = "name";
-    public static final String USER_EMAIL = "email";
-    public static final String USER_PHONE = "phone"; //ini phone hp, phone rumah / tempat tugas menyatu di address
-    public static final String USER_ALTPHONE = "altphone";
-    public static final String USER_FAX = "fax";
-    //ldos_dosisaddress
-    public static final String USER_ADDRESS = "userAddress"; //termasuk lat long*/
-
     //Session static baru
     private static final String USER_IS_LOGIN = "UserIsLoggedIn";
     public static final String USER_DATA = "userData";
@@ -181,7 +159,7 @@ public class LoginSession extends SessionManager{
 
     public void updateServerAccInfo(JsonObject newJsonUserData) throws Exception{
         setLoginSession(newJsonUserData);
-        ExecuteUpdateServerAccInfoIntentService.startUpdateServerAccInfoIntentService(_context,newJsonUserData.toString());
+        ExecuteServerDataServiceIntentService.startUpdateServerAccInfoIntentService(_context,newJsonUserData);
     }
 
     public void setNewRevisionDate(Date newDate) {
@@ -191,6 +169,10 @@ public class LoginSession extends SessionManager{
     }
 
     // TODO: kerjakan sisa method di bawah terkait pemutakhiran UserData
+    public void refreshAccountInfo() throws Exception{
+        UserData user = getUserDetails();
+        ExecuteServerDataServiceIntentService.startCheckServerAccConsistency(_context,JsonBuilder.toJson(user,1),getCurrentToken());
 
-    //refreshAccountStatus {  ada kemungkinan akan menanggil intent service yang akan menjalankan background proses pengecekan pembaharuan account }
+        //setLoginSession(newJsonUserData);
+    }
 }

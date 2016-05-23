@@ -143,7 +143,6 @@ public class UserData {
      */
     public static List<UserData> getList(String s) {
         Type listType = new TypeToken<List<UserData>>() {}.getType();
-        Logging.log('d',"UData","String s : "+s);
         List<UserData> logJData = new Gson().fromJson(JsonBuilder.extractJsonData(s) , listType);
         return logJData;
     }
