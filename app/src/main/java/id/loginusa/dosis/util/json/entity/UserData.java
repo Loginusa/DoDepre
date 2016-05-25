@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.List;
 
 import id.loginusa.dosis.util.Logging;
+import id.loginusa.dosis.util.StaticVar;
 import id.loginusa.dosis.util.json.JsonBuilder;
 
 /**
@@ -69,7 +70,7 @@ public class UserData {
     }
     
     public void setRevision_date(Date revision_date) {
-        this.revision_date = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(revision_date);
+        this.revision_date = new SimpleDateFormat(StaticVar.STRING_DATE_FORMAT).format(revision_date);
     }
     
     public String getAd_user_id() {

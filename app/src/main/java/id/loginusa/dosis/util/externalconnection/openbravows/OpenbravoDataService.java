@@ -65,8 +65,12 @@ public class OpenbravoDataService implements OpenbravoWebService {
 
         if (strparamdata.isEmpty() || strparamdata.length() ==0 ||strreqcode.length() ==0 ||strreqcode.isEmpty()
                 || stractioncode.isEmpty() || stractioncode.length() ==0
-                || strtoken.isEmpty() || strtoken.length() ==0)  {
-            throw new IOException("Parameter Data / ReqCode / Action Code / Token tidak boleh Kosong !");
+                )  {
+            throw new IOException("Parameter Data / ReqCode / Action Code tidak boleh Kosong !");
+        }
+
+        if ( stractioncode.equals(StaticVar.SERVER_WS_SERVICE_DATA_ACTION_CHECK_CONST_DATA) && (strtoken.isEmpty() || strtoken.length() ==0) ) {
+            throw new IOException("Parameter Token tidak boleh Kosong !");
         }
 
         String strUrl = StaticVar.SERVER_URL+"/"+StaticVar.SERVER_CONTEXT+StaticVar.SERVER_WS_SERVICE_DATA;

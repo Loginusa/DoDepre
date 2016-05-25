@@ -20,6 +20,8 @@ import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -42,6 +44,7 @@ public class GCMRegActivity extends AppCompatActivity {
     TextView tv_status;
     ProgressBar pb_checkingProgressBar;
     private boolean isReceiverRegistered;
+    Button btRetry;
     //splash screen
     private final int SPLASH_DISPLAY_LENGTH = 1500;
     Handler timer;
@@ -58,8 +61,19 @@ public class GCMRegActivity extends AppCompatActivity {
         tv_status = (TextView) findViewById(R.id.tv_status);
 //        tv_status.setText("Selamat Datang !");
 //        Logging.toast(this,"Masuk on create : "+(session.getCurrentToken()),1);
-        tv_status.setText("Melakukan Registrasi Device ke Server ...");
+        tv_status.setText(getString(R.string.label_daftarkan_device_ke_server));
         pb_checkingProgressBar =(ProgressBar) findViewById(R.id.pb_checkingProgressBar);
+        btRetry =(Button) findViewById(R.id.btRetry);
+        btRetry.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                btRetry.setVisibility(View.GONE);
+                pb_checkingProgressBar.setVisibility(ProgressBar.VISIBLE);
+                tv_status.setText(getString(R.string.label_daftarkan_device_ke_server));
+                registerReceiver();
+            }
+        });
+        btRetry.setVisibility(View.GONE);
 
         mRegistrationBroadcastReceiver = new BroadcastReceiver() {
             @Override
@@ -79,7 +93,10 @@ public class GCMRegActivity extends AppCompatActivity {
                     startActivity(intentHomePage);
                     finish();
                 } else {
+                    unregisterReceiver();
                     tv_status.setText(getString(R.string.token_error_message));
+                    btRetry.setVisibility(View.VISIBLE);
+                    pb_checkingProgressBar.setVisibility(View.GONE);
                     Logging.toast(context,getString(R.string.token_error_message),2);
                 }
             }
@@ -98,13 +115,6 @@ public class GCMRegActivity extends AppCompatActivity {
 
 //
 //        //check google play service
-        if (checkPlayServices()) {
-            // Start IntentService to register this application with GCM.
-            Intent intent = new Intent(this, RegistrationIntentService.class);
-            startService(intent);
-        }
-
-
     }
 
 
@@ -114,7 +124,18 @@ public class GCMRegActivity extends AppCompatActivity {
             LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
                     new IntentFilter(StaticVar.REGISTRATION_COMPLETE));
             isReceiverRegistered = true;
+
+            if (checkPlayServices()) {
+                // Start IntentService to register this application with GCM.
+                Intent intent = new Intent(this, RegistrationIntentService.class);
+                startService(intent);
+            }
         }
+    }
+
+    private void unregisterReceiver() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
+        isReceiverRegistered = false;
     }
 
 
@@ -127,9 +148,7 @@ public class GCMRegActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
-        //Logging.toast(this,"Pause",1);
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
-        isReceiverRegistered = false;
+        unregisterReceiver();
         super.onPause();
     }
 

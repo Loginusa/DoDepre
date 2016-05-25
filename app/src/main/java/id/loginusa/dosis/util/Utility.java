@@ -7,6 +7,9 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * Created by mfachmirizal on 5/3/16.
  * Pojo Class for this application
@@ -66,5 +69,28 @@ public class Utility {
     public static String generateApiCode(String source,int servercode) throws Exception{
         String sss = source+StaticVar.BUMBU+servercode;
         return CryptoSHA1BASE64.hash(sss);
+    }
+
+    /**
+     * Convert Date String to given string format
+     * @param format Date Format
+     * @param strDate String Date
+     * @return Date with given date format
+     * @throws Exception
+     */
+    static public Date toDateWithFormat(String format,String strDate) throws Exception{
+        return new SimpleDateFormat(format).parse(strDate);
+    }
+
+    /**
+     * Convert Date to given string format
+     * @param format Date Format
+     * @param date String Date
+     * @return Date with given date format
+     * @throws Exception
+     */
+    static public Date toDateWithFormat(String format,Date date) throws Exception{
+        SimpleDateFormat dateFormat = new SimpleDateFormat(format);
+        return dateFormat.parse(dateFormat.format(date));
     }
 }

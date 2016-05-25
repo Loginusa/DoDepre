@@ -38,8 +38,10 @@ public class ExecuteServerDataServiceIntentService extends IntentService {
     private static final String PARAM_JSON_TOKEN= "id.loginusa.dosis.backgroundprocess.intentservices."+className+".param.token";
 
     // BroadCast Receiver Static variable
-    public static final String BROADCAST_REV_DATE = "id.loginusa.dosis.backgroundprocess.intentservices."+className+".broadcast.json_user_data";
+    public static final String BROADCAST_REV_DATE = "id.loginusa.dosis.backgroundprocess.intentservices."+className+".broadcast.broadcast_rev_date";
     public static final String IS_FORCE_LOGOUT = "id.loginusa.dosis.backgroundprocess.intentservices."+className+".broadcast.force_logout";
+    public static final String SERVER_RESPONSE_CODE = "id.loginusa.dosis.backgroundprocess.intentservices."+className+".broadcast.server_response_code";
+    public static final String SERVER_RESPONSE = "id.loginusa.dosis.backgroundprocess.intentservices."+className+".broadcast.server_response";
 
 
     public ExecuteServerDataServiceIntentService() {
@@ -133,11 +135,14 @@ public class ExecuteServerDataServiceIntentService extends IntentService {
             JsonObject jsonResponse = dc.sendRequest(new OpenbravoDataService(), param); //return all data
             int jawaban = JsonBuilder.getJsonStatusCode(jsonResponse);
             if (jawaban == StaticVar.OB_RESPONSE_CODE_ACCOUNT_LOGOFF) {
-                //logoff secara paksa karena status di server sudah logoff
+                //logoff secara paksa karena status di server adalah tidak login
                 broadcastIntent.putExtra(IS_FORCE_LOGOUT,true);
             } else {
+                broadcastIntent.putExtra(SERVER_RESPONSE_CODE,jawaban);
+                broadcastIntent.putExtra(SERVER_RESPONSE,jsonResponse.toString());
                 broadcastIntent.putExtra(IS_FORCE_LOGOUT,false);
             }
+
             broadcastIntent.putExtra(StaticVar.INTENT_STATUS_EXTRA,StaticVar.INTENT_STATUS_EXTRA_SUCCESS);
 
             //Logging.log('d',"INFO_Response","Response check data IS_LOGIN: "+jawaban);

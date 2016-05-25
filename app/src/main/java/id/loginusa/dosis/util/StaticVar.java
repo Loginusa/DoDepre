@@ -5,6 +5,7 @@ package id.loginusa.dosis.util;
  */
 public class StaticVar {
     //All Static Var
+    public static final String STRING_DATE_FORMAT = "dd-MM-yyyy HH:mm:ss";
 
     public static final String REGISTRATION_COMPLETE = "registrationComplete";
 
@@ -48,13 +49,19 @@ public class StaticVar {
     public static final String INTENT_STATUS_EXTRA_FAILED= "status_failed";
 
     //server response
-    public static final int OB_RESPONSE_CODE_SUCCES = 1;
-
     public static final int OB_RESPONSE_CODE_FAILED = 0;
+
+    public static final int OB_RESPONSE_CODE_ACCOUNT_LOGOFF = 2;
+
+    public static final int OB_RESPONSE_CODE_SUCCES = 1;
 
     public static final int OB_RESPONSE_CODE_BANNED = 3;
 
-    public static final int OB_RESPONSE_CODE_ACCOUNT_LOGOFF = 2;
+    public static final int OB_RESPONSE_CODE_CLIENT_DATA_NEWER = 10;
+
+    public static final int OB_RESPONSE_CODE_SERVER_DATA_NEWER = 11;
+
+
 
     public static final int OB_RESPONSE_SERVER_ERROR = 99;
 

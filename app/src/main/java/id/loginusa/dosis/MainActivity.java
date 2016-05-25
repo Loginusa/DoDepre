@@ -38,6 +38,7 @@ import id.loginusa.dosis.backgroundprocess.intentservices.dataservice.ExecuteSer
 import id.loginusa.dosis.util.Logging;
 import id.loginusa.dosis.util.LoginSession;
 import id.loginusa.dosis.util.StaticVar;
+import id.loginusa.dosis.util.Utility;
 import id.loginusa.dosis.util.json.JsonBuilder;
 import id.loginusa.dosis.util.json.entity.UserData;
 
@@ -106,15 +107,15 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View v) {
                 //loginSession.clearSharedPreference();
                 //Logging.toast(MainActivity.this, "Dihapus", 1);
-/*                UserData user = loginSession.getUserDetails();
+                /*UserData user = loginSession.getUserDetails();
                 user.setName("Luhur Pambudi");
-                user.setProfpic("gambar33");*/
+                user.setProfpic("gambaras"); /* */
 
                 try {
-  //                  loginSession.updateServerAccInfo(JsonBuilder.toJson(user,1));
+//                                      loginSession.updateServerAccInfo(JsonBuilder.toJson(user,1));
                     loginSession.refreshAccountInfo();
                 } catch (Exception e) {
-                    Logging.toast(MainActivity.this,"Error saat check : "+e.getMessage(),2);
+                    Logging.toast(MainActivity.this,"Error saat check : "+e.getMessage(),1);
                 }
 
 
@@ -233,7 +234,13 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        setDrawerMenuByRole();
+        try {
+            loginSession.refreshAccountInfo();
+        } catch (Exception e) {
+            Logging.toast(MainActivity.this,"Error saat check : "+e.getMessage(),1);
+        }
+
+//        setDrawerMenuByRole();
 
         //register receiver
         IntentFilter filter = new IntentFilter();
@@ -355,26 +362,49 @@ public class MainActivity extends AppCompatActivity
                 JsonObject jRevDate = JsonBuilder.getJsonObject(strRevDate);
 
                 try {
-                    Date newRevDate = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(jRevDate.getAsJsonObject("response").get("data").getAsJsonArray().get(0).getAsString());
+                    Date newRevDate = Utility.toDateWithFormat(StaticVar.STRING_DATE_FORMAT,jRevDate.getAsJsonObject("response").get("data").getAsJsonArray().get(0).getAsString());
                     loginSession.setNewRevisionDate(newRevDate);
                     Logging.toast(MainActivity.this, getString(R.string.change_data_succes), 2);
                 } catch (ParseException e) {
                     Logging.toast(MainActivity.this, getString(R.string.failed_to_get_new_revdate) + e.getMessage(), 2);
+                } catch (Exception ex) {
+                    Logging.toast(MainActivity.this, getString(R.string.failed_to_get_new_revdate)+" : " + ex.getMessage(), 2);
                 }
             } else if (resultAction.equals(ExecuteServerDataServiceIntentService.ACTION_CheckServerAccConsistency) && resultResponse.equals(StaticVar.INTENT_STATUS_EXTRA_SUCCESS)) {
                 boolean forceLogout = (boolean) extras.get(ExecuteServerDataServiceIntentService.IS_FORCE_LOGOUT);
-            if (forceLogout) {
-                    loginSession.logoutUser();
-                    finish();
-                    startActivity(getIntent());
-                } else {
-                    //tidak di logoff paksa ...
+                try {
+                    if (forceLogout) {
+                        loginSession.logoutUser();
+                        finish();
+                        startActivity(getIntent());
+                    } else {
+                        //tidak di logoff paksa, lakukan pengecekan data
+                        int server_response_code = (int) extras.get(ExecuteServerDataServiceIntentService.SERVER_RESPONSE_CODE);
+                        String server_response =  (String) extras.get(ExecuteServerDataServiceIntentService.SERVER_RESPONSE);
+                        JsonObject jServerResponse = JsonBuilder.getJsonObject(server_response);
+
+                        if (server_response_code == StaticVar.OB_RESPONSE_CODE_SERVER_DATA_NEWER) {
+                            loginSession.updateAccInfo(jServerResponse);
+                        } else if (server_response_code == StaticVar.OB_RESPONSE_CODE_CLIENT_DATA_NEWER) {
+                            Date newRevDate = Utility.toDateWithFormat(StaticVar.STRING_DATE_FORMAT,jServerResponse.getAsJsonObject("response").get("data").getAsJsonArray().get(0).getAsString());
+                            loginSession.setNewRevisionDate(newRevDate);
+                        }
+
+                        //Logging.log('d',"Pesan_Broadcast","Pesan_Broadcast("+server_response_code+") : "+server_response);
+                        //Logging.toast(MainActivity.this,"Pesan_Broadcast("+server_response_code+") : "+server_response,2);
+
+                    }
+                } catch (ParseException e) {
+                    Logging.toast(MainActivity.this, getString(R.string.failed_to_get_new_revdate) + e.getMessage(), 2);
+                } catch (Exception ex) {
+                    Logging.toast(MainActivity.this, getString(R.string.failed_to_get_server_response)+" : " + ex.getMessage(), 2);
                 }
             }
-            else {
+            else { //tidak masuk action manapun / terdapat error di proses IntentService
                 Logging.toast(MainActivity.this,"Error "+" : "+resultResponse,2);
             }
 
+            setDrawerMenuByRole();
         }
 
     }
