@@ -102,7 +102,11 @@
             android:value="@integer/google_play_services_version" />
 
         <service
-            android:name=".backgroundprocess.intentservices.dataservice.ExecuteServerDataServiceIntentService"
+            android:name=".backgroundprocess.intentservices.dataservice.DataServiceIntentService"
+            android:exported="false" />
+        <service
+            android:name=".backgroundprocess.services.LogoutService"
+            android:enabled="true"
             android:exported="false"></service>
     </application>
 

@@ -42,8 +42,7 @@
                     android:inputType="textEmailAddress"
                     android:maxLines="1"
                     android:singleLine="true"
-                    android:nextFocusDown="@+id/password"
-                    android:nextFocusForward="@+id/password"
+                    android:imeOptions="actionNext"
                     />
 
             </android.support.design.widget.TextInputLayout>

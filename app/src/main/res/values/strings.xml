@@ -41,4 +41,7 @@
     <string name="error_check_consistence_data">Error Check Konsistensi data</string>
     <string name="error_update_data">Error Update Data</string>
     <string name="retry">Retry</string>
+    <string name="not_connected_to_server">"Tidak dapat terkoneksi dengan server.."</string>
+    <string name="logout_success">Akun berhasil logout</string>
+    <string name="login_retry_sorry">Maaf Demi alasan keamanan, Server memerintahkan anda untuk melakukan login ulang ...</string>
 </resources>

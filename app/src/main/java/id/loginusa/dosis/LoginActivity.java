@@ -77,7 +77,7 @@ public class LoginActivity extends AppCompatActivity /*implements LoaderCallback
         setContentView(R.layout.activity_login);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        loginSession = new LoginSession(getApplicationContext());
+        loginSession = new LoginSession(LoginActivity.this);
 
         // Set up the login form.
         mUserView = (AutoCompleteTextView) findViewById(R.id.username);
@@ -338,25 +338,25 @@ public class LoginActivity extends AppCompatActivity /*implements LoaderCallback
             JsonArray data = new JsonArray();
             try {
                 // Simulate network access.
-                Thread.sleep(100);
                 OpenbravoConnection dc = new OpenbravoConnection();
                 Map<String,String> param = new HashMap<String,String>();
 
                 param.put(StaticVar.SERVER_WS_USER_USERNAME_PARAM,mUsername);
                 param.put(StaticVar.SERVER_WS_USER_PASS_PARAM, CryptoSHA1BASE64.hash(mPassword));
                 param.put(SessionManager.CURRENT_TOKEN, loginSession.getCurrentToken());
-                param.put(StaticVar.SERVER_WS_CREDENT_REQCODE, Utility.generateApiCode(StaticVar.SERVER_WS_SERVICE_LOGIN,StaticVar.SERVER_WS_LOGIN_SERVICE_CODE));
+                param.put(StaticVar.SERVER_WS_IS_LOGIN, StaticVar.SERVER_WS_LOGIN);
+                param.put(StaticVar.SERVER_WS_CREDENT_REQCODE, Utility.generateApiCode((StaticVar.SERVER_WS_SERVICE_LOGIN+StaticVar.SERVER_WS_LOGIN),StaticVar.SERVER_WS_LOGIN_SERVICE_CODE));
                 JsonObject jsonResponse = dc.sendRequest(new OpenbravoLoginService(),param);
 
                 int status_code = JsonBuilder.getJsonStatusCode(jsonResponse);
-//                Logging.log('d',"status_code","status_code : "+status_code);
-//                Logging.log('d',"Response","Login activity : "+jsonResponse.toString());
 
-                if (status_code == StaticVar.OB_RESPONSE_CODE_SUCCES) {
+                if (status_code == StaticVar.OB_RESPONSE_CODE_SUCCESS) {
                     messageErr = getString(R.string.login_success);
                     loginSession.setLoginSession(jsonResponse);
-
                     return true;
+                } else if (status_code == StaticVar.OB_RESPONSE_CODE_BANNED) {
+                    messageErr = "Akun ini telah diblokir. Silahkan hubungi kami untuk Informasi lebih lanjut";
+                    return false;
                 } else if (status_code == StaticVar.OB_RESPONSE_SERVER_ERROR) {
                     messageErr = "Internal Server Error, bila tetap berlanjut, harap hubungi pengembang.";
                     return false;

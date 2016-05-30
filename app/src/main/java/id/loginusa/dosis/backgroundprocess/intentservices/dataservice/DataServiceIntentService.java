@@ -6,9 +6,11 @@ import android.content.Context;
 
 import com.google.gson.JsonObject;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import id.loginusa.dosis.R;
 import id.loginusa.dosis.util.Logging;
 import id.loginusa.dosis.util.SessionManager;
 import id.loginusa.dosis.util.StaticVar;
@@ -24,27 +26,27 @@ import id.loginusa.dosis.util.json.JsonBuilder;
  * TODO: Customize class - update intent actions, extra parameters and static
  * helper methods.
  */
-public class ExecuteServerDataServiceIntentService extends IntentService {
+public class DataServiceIntentService extends IntentService {
 
-    private static final String className = "ExecuteServerDataServiceIntentService";
+    private static final String className = "DataServiceIntentService";
 
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
-    public static final String ACTION_UpdateServerAccInfo = "id.loginusa.dosis.backgroundprocess.intentservices."+className+".action.UpdateServerAccInfo";
+    public static final String ACTION_UpdateServerAccInfo = "id.loginusa.dosis.backgroundprocess.intentservices.dataservice."+className+".action.UpdateServerAccInfo";
 
-    public static final String ACTION_CheckServerAccConsistency = "id.loginusa.dosis.backgroundprocess.intentservices."+className+".action.CheckServerAccConsistency";
+    public static final String ACTION_CheckServerAccConsistency = "id.loginusa.dosis.backgroundprocess.intentservices.dataservice."+className+".action.CheckServerAccConsistency";
 
     // Parameters
-    private static final String PARAM_JSON_USER_DATA = "id.loginusa.dosis.backgroundprocess.intentservices."+className+".param.json_user_data";
-    private static final String PARAM_JSON_TOKEN= "id.loginusa.dosis.backgroundprocess.intentservices."+className+".param.token";
+    private static final String PARAM_JSON_USER_DATA = "id.loginusa.dosis.backgroundprocess.intentservices.dataservice."+className+".param.json_user_data";
+    private static final String PARAM_JSON_TOKEN= "id.loginusa.dosis.backgroundprocess.intentservices.dataservice."+className+".param.token";
 
     // BroadCast Receiver Static variable
-    public static final String BROADCAST_REV_DATE = "id.loginusa.dosis.backgroundprocess.intentservices."+className+".broadcast.broadcast_rev_date";
-    public static final String IS_FORCE_LOGOUT = "id.loginusa.dosis.backgroundprocess.intentservices."+className+".broadcast.force_logout";
-    public static final String SERVER_RESPONSE_CODE = "id.loginusa.dosis.backgroundprocess.intentservices."+className+".broadcast.server_response_code";
-    public static final String SERVER_RESPONSE = "id.loginusa.dosis.backgroundprocess.intentservices."+className+".broadcast.server_response";
+    public static final String BROADCAST_REV_DATE = "id.loginusa.dosis.backgroundprocess.intentservices.dataservice."+className+".broadcast.broadcast_rev_date";
+    public static final String IS_FORCE_LOGOUT = "id.loginusa.dosis.backgroundprocess.intentservices.dataservice."+className+".broadcast.force_logout";
+    public static final String SERVER_RESPONSE_CODE = "id.loginusa.dosis.backgroundprocess.intentservices.dataservice."+className+".broadcast.server_response_code";
+    public static final String SERVER_RESPONSE = "id.loginusa.dosis.backgroundprocess.intentservices.dataservice."+className+".broadcast.server_response";
 
 
-    public ExecuteServerDataServiceIntentService() {
+    public DataServiceIntentService() {
         super(className);
     }
 
@@ -55,7 +57,7 @@ public class ExecuteServerDataServiceIntentService extends IntentService {
      * @see IntentService
      */
     public static void startUpdateServerAccInfoIntentService(Context context, JsonObject data){
-        Intent intent = new Intent(context, ExecuteServerDataServiceIntentService.class);
+        Intent intent = new Intent(context, DataServiceIntentService.class);
         intent.setAction(ACTION_UpdateServerAccInfo);
         intent.putExtra(PARAM_JSON_USER_DATA, data.toString());
 
@@ -64,7 +66,7 @@ public class ExecuteServerDataServiceIntentService extends IntentService {
     }
 
     public static void startCheckServerAccConsistency(Context context, JsonObject data, String token){
-        Intent intent = new Intent(context, ExecuteServerDataServiceIntentService.class);
+        Intent intent = new Intent(context, DataServiceIntentService.class);
         intent.setAction(ACTION_CheckServerAccConsistency);
         intent.putExtra(PARAM_JSON_USER_DATA, data.toString());
         intent.putExtra(PARAM_JSON_TOKEN, token);
@@ -124,6 +126,7 @@ public class ExecuteServerDataServiceIntentService extends IntentService {
         Intent broadcastIntent = new Intent();
         broadcastIntent.setAction(ACTION_CheckServerAccConsistency);
         broadcastIntent.addCategory(Intent.CATEGORY_DEFAULT);
+
         try {
             Map<String, String> param = new HashMap<String, String>();
             param.put(StaticVar.SERVER_WS_JSON_USER_DATA_PARAM, data);
@@ -146,9 +149,15 @@ public class ExecuteServerDataServiceIntentService extends IntentService {
             broadcastIntent.putExtra(StaticVar.INTENT_STATUS_EXTRA,StaticVar.INTENT_STATUS_EXTRA_SUCCESS);
 
             //Logging.log('d',"INFO_Response","Response check data IS_LOGIN: "+jawaban);
-        } catch(Exception e) {
-            Logging.log('d', "INI", "Response Exception : " + e.getMessage());
-            broadcastIntent.putExtra(StaticVar.INTENT_STATUS_EXTRA, e.getMessage()); //juga sebagai penampung error message, bila terjadi exception
+        } catch ( IOException io) {
+            //error koneksi, do nothing
+            broadcastIntent.putExtra(StaticVar.INTENT_STATUS_EXTRA, getString(R.string.not_connected_to_server));
+            Logging.log('e', className, getString(R.string.not_connected_to_server));
+            //return;
+        }
+        catch(Exception e) {
+            Logging.log('d', className, "Response Exception : " + e.getMessage());
+            broadcastIntent.putExtra(StaticVar.INTENT_STATUS_EXTRA, "Error : "+e.getMessage()); //juga sebagai penampung error message, bila terjadi exception
         }
         sendBroadcast(broadcastIntent);
         this.stopSelf();

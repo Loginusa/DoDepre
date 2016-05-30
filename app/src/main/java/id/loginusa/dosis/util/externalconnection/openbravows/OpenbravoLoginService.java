@@ -40,8 +40,10 @@ public class OpenbravoLoginService implements OpenbravoWebService {
                 });
         String strparamuser = "";
         String strparampass = "";
+        String strlogoutdate = "";
         String strreqcode = "";
         String strtoken = "";
+        String islogin = "";
         for(Map.Entry<String, String> entry : param.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
@@ -57,25 +59,42 @@ public class OpenbravoLoginService implements OpenbravoWebService {
             if (key.equals(SessionManager.CURRENT_TOKEN)) {
                 strtoken+=value;
             }
+            if (key.equals(StaticVar.SERVER_WS_IS_LOGIN)) {
+                islogin+=value.toUpperCase();
+            }
+            if (key.equals(StaticVar.SERVER_WS_USER_LOGOUTDATE_PARAM)) {
+                strlogoutdate+=value;
+            }
         }
 
-        if (strparamuser.isEmpty() || strparamuser.length() ==0 ||strreqcode.length() ==0 ||strreqcode.isEmpty()
-                || strtoken.isEmpty() || strtoken.length() ==0) {
+        if (islogin.isEmpty() || islogin.length() == 0) {
+            throw new IOException("Error : Parameter IS_LOGIN tidak boleh Kosong !");
+        }
+
+        if ((strparamuser.isEmpty() || strparamuser.length() ==0 ||strreqcode.length() ==0 ||strreqcode.isEmpty()
+                || strtoken.isEmpty() || strtoken.length() ==0) && islogin.equals(StaticVar.SERVER_WS_LOGIN)  ) {
             throw new IOException("Error : Parameter User / ReqCode / Token tidak boleh Kosong !");
+        }
+
+        if ((strparamuser.isEmpty() || strparamuser.length() ==0 ||strreqcode.length() ==0 ||strreqcode.isEmpty()
+                ) && islogin.equals(StaticVar.SERVER_WS_LOGOUT)  ) {
+            throw new IOException("Error : Parameter User / ReqCode / Logout Date tidak boleh Kosong !");
         }
 
         String strUrl = StaticVar.SERVER_URL+"/"+StaticVar.SERVER_CONTEXT+StaticVar.SERVER_WS_SERVICE_LOGIN;
         BaseGenericUrl url = new BaseGenericUrl(strUrl);
 
         setMandatoryParam(url);
-        url.put(StaticVar.SERVER_WS_CREDENT_REQCODE,strreqcode);
         url.put(StaticVar.SERVER_WS_USER_USERNAME_PARAM,strparamuser);
-        url.put(StaticVar.SERVER_WS_USER_PASS_PARAM,strparampass);
-        url.put(SessionManager.CURRENT_TOKEN,strtoken);
-
+        url.put(StaticVar.SERVER_WS_CREDENT_REQCODE, strreqcode);
+        if (islogin.equals(StaticVar.SERVER_WS_LOGIN)) {
+            url.put(StaticVar.SERVER_WS_USER_PASS_PARAM, strparampass);
+            url.put(SessionManager.CURRENT_TOKEN, strtoken);
+        } else {
+            url.put(StaticVar.SERVER_WS_USER_LOGOUTDATE_PARAM, strlogoutdate);
+        }
 
         HttpRequest request = requestFactory.buildGetRequest(url);
-
         JsonObject respon = parseResponse(request.execute());
         return respon;
     }

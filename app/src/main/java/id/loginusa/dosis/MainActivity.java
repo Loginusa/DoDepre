@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -30,11 +31,13 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.gson.JsonObject;
 
 
+import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
-import id.loginusa.dosis.backgroundprocess.intentservices.dataservice.ExecuteServerDataServiceIntentService;
+import id.loginusa.dosis.backgroundprocess.intentservices.dataservice.DataServiceIntentService;
+import id.loginusa.dosis.backgroundprocess.services.LogoutService;
 import id.loginusa.dosis.util.Logging;
 import id.loginusa.dosis.util.LoginSession;
 import id.loginusa.dosis.util.StaticVar;
@@ -56,7 +59,7 @@ public class MainActivity extends AppCompatActivity
     private DataServiceBroadcastReceiver dataServiceBroadcastReceiver;
 
     //testing
-    Button bt;
+    Button bt_test;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -70,9 +73,7 @@ public class MainActivity extends AppCompatActivity
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        loginSession = new LoginSession(getApplicationContext());
-
-        //TODO:Tambahkan pengecekan is login nanti, bila tidak login / password berubah, akan kembali ke guest screen
+        loginSession = new LoginSession(this);
 
         EditText edToken, edInstanceId;
         edToken = (EditText) findViewById(R.id.edToken);
@@ -91,32 +92,45 @@ public class MainActivity extends AppCompatActivity
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
                 //toolbar.setTitle("Anjayyy");
-                Logging.toast(MainActivity.this,"Session Sekarang : "+loginSession.getUserData(),2);
-                Logging.log('i',"SESSION_SKRG","Session Sekarang : "+loginSession.getUserData());
+                //Logging.toast(MainActivity.this,"Session Sekarang : "+loginSession.getUserData(),2);
+                //Logging.log('i',"SESSION_SKRG","Session Sekarang : "+loginSession.getUserData());
+                Logging.toast(MainActivity.this,"Pending Logout Sekarang : "+loginSession.getPendingUserLogout(),2);
             }
         });
 
-        bt = (Button) findViewById(R.id.buttest);
-        assert bt != null;
+        bt_test = (Button) findViewById(R.id.buttest);
+        assert bt_test != null;
         if (param != null) { //bila berasal dari notif
-            bt.setText(param);
+            bt_test.setText(param);
         }
 
-        bt.setOnClickListener(new View.OnClickListener() {
+        bt_test.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //loginSession.clearSharedPreference();
                 //Logging.toast(MainActivity.this, "Dihapus", 1);
-                /*UserData user = loginSession.getUserDetails();
-                user.setName("Luhur Pambudi");
-                user.setProfpic("gambaras"); /* */
+                UserData user = loginSession.getUserDetails();
+                Logging.toast(MainActivity.this,"Tanggal : "+Utility.GetUTCdatetimeAsString(),1);
+/*
+                Calendar cal = Calendar.getInstance();
+                cal.set(Calendar.YEAR, 1965);
+                cal.set(Calendar.MONTH, Calendar.DECEMBER);
+                cal.set(Calendar.DAY_OF_MONTH, 1);
+                Date dateRepresentation = cal.getTime();
+
+                user.setBirthday(dateRepresentation); *//* *//*
 
                 try {
-//                                      loginSession.updateServerAccInfo(JsonBuilder.toJson(user,1));
+                    loginSession.updateServerAccInfo(JsonBuilder.toJson(user,1));
                     loginSession.refreshAccountInfo();
                 } catch (Exception e) {
                     Logging.toast(MainActivity.this,"Error saat check : "+e.getMessage(),1);
-                }
+                }*/
+
+                //Intent intent = new Intent(MainActivity.this, LogoutService.class);
+                //startService(intent);
+
+
 
 
 //                finish();
@@ -134,7 +148,6 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        //setDrawerMenuByRole();
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -190,9 +203,9 @@ public class MainActivity extends AppCompatActivity
             builder.setMessage(R.string.logout_confirm)
                     .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-                            loginSession.logoutUser();
-                            finish();
-                            startActivity(getIntent());
+                            loginSession.logoutUser(false);
+//                            finish();
+//                            startActivity(getIntent());
                         }
                     })
                     .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -234,18 +247,18 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        setDrawerMenuByRole();
         try {
-            loginSession.refreshAccountInfo();
+            boolean executed= loginSession.refreshAccountInfo();
+            if (!executed) {setDrawerMenuByRole();}
         } catch (Exception e) {
             Logging.toast(MainActivity.this,"Error saat check : "+e.getMessage(),1);
         }
 
-//        setDrawerMenuByRole();
-
         //register receiver
         IntentFilter filter = new IntentFilter();
-        filter.addAction(ExecuteServerDataServiceIntentService.ACTION_UpdateServerAccInfo);
-        filter.addAction(ExecuteServerDataServiceIntentService.ACTION_CheckServerAccConsistency);
+        filter.addAction(DataServiceIntentService.ACTION_UpdateServerAccInfo);
+        filter.addAction(DataServiceIntentService.ACTION_CheckServerAccConsistency);
         filter.addCategory(Intent.CATEGORY_DEFAULT);
         dataServiceBroadcastReceiver = new DataServiceBroadcastReceiver();
         registerReceiver(dataServiceBroadcastReceiver, filter);
@@ -273,7 +286,7 @@ public class MainActivity extends AppCompatActivity
             navhead_email.setText(user.getEmail());
 
             //test button yg preference
-            bt.setVisibility(View.VISIBLE);
+            bt_test.setVisibility(View.VISIBLE);
 
 /*            String imagePath = sharedPreferences.getString(LoginSharedPreference.PROFPIC,"");
             if (imagePath != "") {
@@ -303,8 +316,8 @@ public class MainActivity extends AppCompatActivity
             navigationView.getMenu().setGroupVisible(R.id.gr_not_login, true);
             navigationView.getMenu().setGroupVisible(R.id.gr_is_login, false);
 
-            bt.setText("Test Ganti Nama");
-            bt.setVisibility(View.INVISIBLE);
+            bt_test.setText("Test Ganti Nama");
+            bt_test.setVisibility(View.INVISIBLE);
             //navhead_profpic.setOnClickListener(null);
         }
 
@@ -357,8 +370,8 @@ public class MainActivity extends AppCompatActivity
             Bundle extras = intent.getExtras();
             String resultResponse = (String) extras.get(StaticVar.INTENT_STATUS_EXTRA);
             String resultAction = intent.getAction();
-            if (resultAction.equals(ExecuteServerDataServiceIntentService.ACTION_UpdateServerAccInfo) && resultResponse.equals(StaticVar.INTENT_STATUS_EXTRA_SUCCESS)) {
-                String strRevDate = (String) extras.get(ExecuteServerDataServiceIntentService.BROADCAST_REV_DATE);
+            if (resultAction.equals(DataServiceIntentService.ACTION_UpdateServerAccInfo) && resultResponse.equals(StaticVar.INTENT_STATUS_EXTRA_SUCCESS)) {
+                String strRevDate = (String) extras.get(DataServiceIntentService.BROADCAST_REV_DATE);
                 JsonObject jRevDate = JsonBuilder.getJsonObject(strRevDate);
 
                 try {
@@ -370,17 +383,20 @@ public class MainActivity extends AppCompatActivity
                 } catch (Exception ex) {
                     Logging.toast(MainActivity.this, getString(R.string.failed_to_get_new_revdate)+" : " + ex.getMessage(), 2);
                 }
-            } else if (resultAction.equals(ExecuteServerDataServiceIntentService.ACTION_CheckServerAccConsistency) && resultResponse.equals(StaticVar.INTENT_STATUS_EXTRA_SUCCESS)) {
-                boolean forceLogout = (boolean) extras.get(ExecuteServerDataServiceIntentService.IS_FORCE_LOGOUT);
+            } else if (resultAction.equals(DataServiceIntentService.ACTION_CheckServerAccConsistency) && resultResponse.equals(StaticVar.INTENT_STATUS_EXTRA_SUCCESS)) {
+                boolean forceLogout = (boolean) extras.get(DataServiceIntentService.IS_FORCE_LOGOUT);
                 try {
                     if (forceLogout) {
-                        loginSession.logoutUser();
-                        finish();
-                        startActivity(getIntent());
+                        loginSession.logoutUser(forceLogout);
+                        Logging.toast(MainActivity.this,getString(R.string.login_retry_sorry),2);
+                        Intent i = new Intent(MainActivity.this, LoginActivity.class);
+                        drawer.closeDrawer(GravityCompat.START);
+                        //startActivityForResult(intent, U.LOGIN_ACTIVITY_RESULT);
+                        startActivity(i);
                     } else {
                         //tidak di logoff paksa, lakukan pengecekan data
-                        int server_response_code = (int) extras.get(ExecuteServerDataServiceIntentService.SERVER_RESPONSE_CODE);
-                        String server_response =  (String) extras.get(ExecuteServerDataServiceIntentService.SERVER_RESPONSE);
+                        int server_response_code = (int) extras.get(DataServiceIntentService.SERVER_RESPONSE_CODE);
+                        String server_response =  (String) extras.get(DataServiceIntentService.SERVER_RESPONSE);
                         JsonObject jServerResponse = JsonBuilder.getJsonObject(server_response);
 
                         if (server_response_code == StaticVar.OB_RESPONSE_CODE_SERVER_DATA_NEWER) {
@@ -394,14 +410,17 @@ public class MainActivity extends AppCompatActivity
                         //Logging.toast(MainActivity.this,"Pesan_Broadcast("+server_response_code+") : "+server_response,2);
 
                     }
-                } catch (ParseException e) {
+                } catch (IOException e) {
+                    //tidak terkoneksi, do nothing
+                    Logging.log('e', "IOExMainActivity1", "Tidak Terkoneksi Server ! ");
+                }  catch (ParseException e) {
                     Logging.toast(MainActivity.this, getString(R.string.failed_to_get_new_revdate) + e.getMessage(), 2);
                 } catch (Exception ex) {
                     Logging.toast(MainActivity.this, getString(R.string.failed_to_get_server_response)+" : " + ex.getMessage(), 2);
                 }
             }
             else { //tidak masuk action manapun / terdapat error di proses IntentService
-                Logging.toast(MainActivity.this,"Error "+" : "+resultResponse,2);
+                Logging.toast(MainActivity.this,resultResponse,2);
             }
 
             setDrawerMenuByRole();

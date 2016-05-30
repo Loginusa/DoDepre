@@ -29,7 +29,8 @@ public class SessionManager {
     public static final String CURRENT_TOKEN = "currentToken";
     public static final String CURRENT_INSTANCE_ID = "instanceid";
 
-
+    //PendingLogout
+    public static final String PENDING_LOGOUT_USER = "pending_logout_user";
 
 
     // Constructor
@@ -165,6 +166,20 @@ public class SessionManager {
         // Storing current instanceId
         editor.putString(CURRENT_INSTANCE_ID, instanceid).apply();
         // commit changes
+        editor.commit();
+    }
+
+    public void createPendingUserLogout(String user) {
+        editor.putString(PENDING_LOGOUT_USER, user).apply();
+        editor.commit();
+    }
+
+    public String getPendingUserLogout() {
+        return pref.getString(PENDING_LOGOUT_USER, "");
+    }
+
+    public void clearPendingUserLogout() {
+        editor.remove(PENDING_LOGOUT_USER);
         editor.commit();
     }
 

@@ -1,15 +1,25 @@
 package id.loginusa.dosis.util;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
 import com.google.gson.JsonObject;
 
+import org.json.JSONException;
+
+import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import id.loginusa.dosis.LoginActivity;
-import id.loginusa.dosis.backgroundprocess.intentservices.dataservice.ExecuteServerDataServiceIntentService;
+import id.loginusa.dosis.R;
+import id.loginusa.dosis.backgroundprocess.intentservices.dataservice.DataServiceIntentService;
+import id.loginusa.dosis.backgroundprocess.services.LogoutService;
+import id.loginusa.dosis.util.externalconnection.openbravows.OpenbravoConnection;
+import id.loginusa.dosis.util.externalconnection.openbravows.OpenbravoLoginService;
 import id.loginusa.dosis.util.json.JsonBuilder;
 import id.loginusa.dosis.util.json.entity.UserData;
 
@@ -24,6 +34,7 @@ public class LoginSession extends SessionManager{
     //Session static baru
     private static final String USER_IS_LOGIN = "UserIsLoggedIn";
     public static final String USER_DATA = "userData";
+    private static final String className="LoginSession";
 
     public LoginSession(Context context) {
         super(context);
@@ -82,16 +93,29 @@ public class LoginSession extends SessionManager{
     /**
      * Clear session details
      * */
-    public void logoutUser(){
+    public void logoutUser(boolean forceLogout){
+        //kirim laporan ke server bahwa user ini logoff TODO:kasih delay task nanti, bahwa bila koneksi off / tidak terkoneksi proses ini ngedelay
+        if (!forceLogout) {
+            UserData ud = getUserDetails();
+            //jalankan service untuk kirim pesan logout ke server
+            //SessionIntentService.startLogoutIntentService(_context, ud.getUsername());
+            LogoutService.startLogoutService(_context, ud.getUsername());
+        }
+
         // Clearing all data from Shared Preferences, excepts GCM session
         boolean issent = pref.getBoolean(SENT_TOKEN_TO_SERVER, false);
         String token = pref.getString(CURRENT_TOKEN, "");
         String instanceid = pref.getString(CURRENT_INSTANCE_ID, "");
+        String pendinglogoutuser = pref.getString(PENDING_LOGOUT_USER, "");
 
         editor.clear();
         editor.commit();
         //reset session token gcm
         createGCMTokenSentSession(issent,token,instanceid);
+        createPendingUserLogout(pendinglogoutuser);
+
+        ((Activity)_context).finish();
+        ((Activity)_context).startActivity(((Activity)_context).getIntent());
     }
 
     /**
@@ -107,6 +131,7 @@ public class LoginSession extends SessionManager{
         }
         return user.isIsLogin();
     }
+
 
     /**
      * Get stored session data
@@ -139,6 +164,7 @@ public class LoginSession extends SessionManager{
         return user;
     }
 
+
     //Method yang berkenaan pemutakhiran UserData
     public void updateAccInfo(JsonObject newJsonUserData) throws Exception{
         setLoginSession(newJsonUserData);
@@ -159,7 +185,7 @@ public class LoginSession extends SessionManager{
 
     public void updateServerAccInfo(JsonObject newJsonUserData) throws Exception{
         setLoginSession(newJsonUserData);
-        ExecuteServerDataServiceIntentService.startUpdateServerAccInfoIntentService(_context,newJsonUserData);
+        DataServiceIntentService.startUpdateServerAccInfoIntentService(_context,newJsonUserData);
     }
 
     public void setNewRevisionDate(Date newDate) {
@@ -168,11 +194,12 @@ public class LoginSession extends SessionManager{
         setLoginSession(JsonBuilder.toJson(user,1));
     }
 
-    // TODO: kerjakan sisa method di bawah terkait pemutakhiran UserData
-    public void refreshAccountInfo() throws Exception{
+    public boolean refreshAccountInfo() throws Exception{
         UserData user = getUserDetails();
-        ExecuteServerDataServiceIntentService.startCheckServerAccConsistency(_context,JsonBuilder.toJson(user,1),getCurrentToken());
-
-        //setLoginSession(newJsonUserData);
+        boolean userLoggedin = user.isIsLogin();
+        if (userLoggedin) {
+            DataServiceIntentService.startCheckServerAccConsistency(_context, JsonBuilder.toJson(user, 1), getCurrentToken());
+        }
+        return userLoggedin;
     }
 }
